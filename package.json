@@ -12,6 +12,21 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "org",
+        "aliases": ["Org", "org"],
+        "extensions": [".org"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "org",
+        "scopeName": "source.org",
+        "path": "./syntaxes/org.tmLanguage.json"
+      }
+    ],
     "commands": [
       {
         "command": "org-lite.helloWorld",
