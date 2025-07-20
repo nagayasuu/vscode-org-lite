@@ -10,13 +10,6 @@ export function activate(context: vscode.ExtensionContext) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "org-lite" is now active!');
 
-	// Hello World command
-	const helloWorldDisposable = vscode.commands.registerCommand('org-lite.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Org Lite!');
-	});
-
 	// Helper function to rotate TODO states
 	function rotateTodoState(reverse: boolean = false) {
 		const editor = vscode.window.activeTextEditor;
@@ -93,7 +86,6 @@ export function activate(context: vscode.ExtensionContext) {
 		rotateTodoState(true);
 	});
 
-	context.subscriptions.push(helloWorldDisposable);
 	context.subscriptions.push(rotateTodoDisposable);
 	context.subscriptions.push(rotateTodoReverseDisposable);
 }

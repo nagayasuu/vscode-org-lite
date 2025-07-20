@@ -29,10 +29,6 @@
     ],
     "commands": [
       {
-        "command": "org-lite.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "org-lite.rotateTodo",
         "title": "Rotate TODO state"
       },
