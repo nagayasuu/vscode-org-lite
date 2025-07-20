@@ -3,29 +3,84 @@
   "name": "Org",
   "scopeName": "source.org",
   "patterns": [
-    {
-      "match": "^\\*\\s+.*$",
-      "name": "heading.1.markdown"
-    },
-    {
-      "match": "^\\*{2}\\s+.*$",
-      "name": "heading.2.markdown"
-    },
-    {
-      "match": "^\\*{3}\\s+.*$",
-      "name": "heading.3.markdown"
-    },
-    {
-      "match": "^\\*{4}\\s+.*$",
-      "name": "heading.4.markdown"
-    },
-    {
-      "match": "^\\*{5}\\s+.*$",
-      "name": "heading.5.markdown"
-    },
-    {
-      "match": "^\\*{6}\\s+.*$",
-      "name": "heading.6.markdown"
+    {"include": "#heading"}
+  ],
+  "repository": {
+    "heading": {
+      "patterns": [
+        {
+          "name": "heading.1.markdown",
+          "match": "^(\\*)\\s+(?:(TODO|DONE)\\s+)?(.*?)$",
+          "captures": {
+            "2": {
+              "patterns": [
+                {"name": "keyword.control.todo.org", "match": "TODO"},
+                {"name": "keyword.control.done.org", "match": "DONE"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "heading.2.markdown", 
+          "match": "^(\\*{2})\\s+(?:(TODO|DONE)\\s+)?(.*?)$",
+          "captures": {
+            "2": {
+              "patterns": [
+                {"name": "keyword.control.todo.org", "match": "TODO"},
+                {"name": "keyword.control.done.org", "match": "DONE"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "heading.3.markdown",
+          "match": "^(\\*{3})\\s+(?:(TODO|DONE)\\s+)?(.*?)$",
+          "captures": {
+            "2": {
+              "patterns": [
+                {"name": "keyword.control.todo.org", "match": "TODO"},
+                {"name": "keyword.control.done.org", "match": "DONE"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "heading.4.markdown",
+          "match": "^(\\*{4})\\s+(?:(TODO|DONE)\\s+)?(.*?)$",
+          "captures": {
+            "2": {
+              "patterns": [
+                {"name": "keyword.control.todo.org", "match": "TODO"},
+                {"name": "keyword.control.done.org", "match": "DONE"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "heading.5.markdown",
+          "match": "^(\\*{5})\\s+(?:(TODO|DONE)\\s+)?(.*?)$",
+          "captures": {
+            "2": {
+              "patterns": [
+                {"name": "keyword.control.todo.org", "match": "TODO"},
+                {"name": "keyword.control.done.org", "match": "DONE"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "heading.6.markdown",
+          "match": "^(\\*{6})\\s+(?:(TODO|DONE)\\s+)?(.*?)$",
+          "captures": {
+            "2": {
+              "patterns": [
+                {"name": "keyword.control.todo.org", "match": "TODO"},
+                {"name": "keyword.control.done.org", "match": "DONE"}
+              ]
+            }
+          }
+        }
+      ]
     }
-  ]
+  }
 }
