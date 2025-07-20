@@ -2,9 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Org",
   "scopeName": "source.org",
-  "patterns": [
-    {"include": "#heading"}
-  ],
+  "patterns": [{ "include": "#heading" }],
   "repository": {
     "heading": {
       "patterns": [
@@ -14,20 +12,20 @@
           "captures": {
             "2": {
               "patterns": [
-                {"name": "keyword.control.todo.org", "match": "TODO"},
-                {"name": "keyword.control.done.org", "match": "DONE"}
+                { "name": "keyword.control.todo.org", "match": "TODO" },
+                { "name": "keyword.control.done.org", "match": "DONE" }
               ]
             }
           }
         },
         {
-          "name": "heading.2.markdown", 
+          "name": "heading.2.markdown",
           "match": "^(\\*{2})\\s+(?:(TODO|DONE)\\s+)?(.*?)$",
           "captures": {
             "2": {
               "patterns": [
-                {"name": "keyword.control.todo.org", "match": "TODO"},
-                {"name": "keyword.control.done.org", "match": "DONE"}
+                { "name": "keyword.control.todo.org", "match": "TODO" },
+                { "name": "keyword.control.done.org", "match": "DONE" }
               ]
             }
           }
@@ -38,8 +36,8 @@
           "captures": {
             "2": {
               "patterns": [
-                {"name": "keyword.control.todo.org", "match": "TODO"},
-                {"name": "keyword.control.done.org", "match": "DONE"}
+                { "name": "keyword.control.todo.org", "match": "TODO" },
+                { "name": "keyword.control.done.org", "match": "DONE" }
               ]
             }
           }
@@ -50,8 +48,8 @@
           "captures": {
             "2": {
               "patterns": [
-                {"name": "keyword.control.todo.org", "match": "TODO"},
-                {"name": "keyword.control.done.org", "match": "DONE"}
+                { "name": "keyword.control.todo.org", "match": "TODO" },
+                { "name": "keyword.control.done.org", "match": "DONE" }
               ]
             }
           }
@@ -62,8 +60,8 @@
           "captures": {
             "2": {
               "patterns": [
-                {"name": "keyword.control.todo.org", "match": "TODO"},
-                {"name": "keyword.control.done.org", "match": "DONE"}
+                { "name": "keyword.control.todo.org", "match": "TODO" },
+                { "name": "keyword.control.done.org", "match": "DONE" }
               ]
             }
           }
@@ -74,8 +72,8 @@
           "captures": {
             "2": {
               "patterns": [
-                {"name": "keyword.control.todo.org", "match": "TODO"},
-                {"name": "keyword.control.done.org", "match": "DONE"}
+                { "name": "keyword.control.todo.org", "match": "TODO" },
+                { "name": "keyword.control.done.org", "match": "DONE" }
               ]
             }
           }
