@@ -31,6 +31,26 @@
       {
         "command": "org-lite.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "org-lite.rotateTodo",
+        "title": "Rotate TODO state"
+      },
+      {
+        "command": "org-lite.rotateTodoReverse",
+        "title": "Rotate TODO state (reverse)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "org-lite.rotateTodo",
+        "key": "alt+right",
+        "when": "editorLangId == org"
+      },
+      {
+        "command": "org-lite.rotateTodoReverse",
+        "key": "alt+left",
+        "when": "editorLangId == org"
       }
     ]
   },
