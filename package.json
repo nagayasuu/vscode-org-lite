@@ -53,7 +53,17 @@
         "key": "alt+left",
         "when": "editorLangId == org"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Org Lite",
+      "properties": {
+        "org-lite.outline.cleanView": {
+          "type": "boolean",
+          "default": false,
+          "description": "Clean view mode for outline"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

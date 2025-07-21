@@ -6,7 +6,9 @@ export class OrgDocumentSymbolProvider
 {
   // Cache regex for better performance
   private static readonly HEADING_REGEX = /^(\*{1,6})\s+(.+)$/;
+  private static readonly HEADING_WITH_INDENT_REGEX = /^(\s*)(\*{1})\s+(.+)$/;
   private static readonly PATH_REGEX = /([\/\\]?[\w\-\.\/\\]+(?:\.[\w]+)?)/g;
+  private static readonly TODO_KEYWORDS_REGEX = /^(TODO|DONE)\s+(.*)$/;
 
   provideDocumentSymbols(
     document: vscode.TextDocument,
@@ -21,6 +23,110 @@ export class OrgDocumentSymbolProvider
 
     const lines = text.split('\n');
 
+    // Get clean view configuration
+    const config = vscode.workspace.getConfiguration('org-lite.outline');
+    const cleanView = config.get<boolean>('cleanView', false);
+
+    // Choose processing strategy based on clean view setting
+    if (cleanView) {
+      return this.processCleanViewMode(lines, document, token);
+    } else {
+      return this.processStandardMode(lines, document, token);
+    }
+  }
+
+  /**
+   * Process document symbols in clean view mode
+   */
+  private processCleanViewMode(
+    lines: string[],
+    document: vscode.TextDocument,
+    token: vscode.CancellationToken
+  ): vscode.DocumentSymbol[] {
+    // Quick scan to count potential headings (pre-allocate array)
+    let headingCount = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.trim().startsWith('*') || line.match(/^\s+\*/)) headingCount++;
+    }
+
+    // Pre-allocate array with estimated size
+    const symbolsWithLevel: Array<{
+      symbol: vscode.DocumentSymbol;
+      level: number;
+      line: number;
+    }> = new Array(headingCount);
+
+    let symbolIndex = 0;
+
+    // Get current workspace folder once
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+    const currentDir = workspaceFolder
+      ? workspaceFolder.uri.fsPath
+      : path.dirname(document.uri.fsPath);
+
+    // Process lines for clean view mode
+    for (let i = 0; i < lines.length; i++) {
+      // Check cancellation less frequently (every 100 lines)
+      if (i % 100 === 0 && token.isCancellationRequested) {
+        return [];
+      }
+
+      const line = lines[i];
+
+      // Clean view mode: support indented headings with space-based level calculation
+      if (!line.trim().startsWith('*')) continue;
+
+      const indentMatch = line.match(
+        OrgDocumentSymbolProvider.HEADING_WITH_INDENT_REGEX
+      );
+      if (!indentMatch) continue;
+
+      const indent = indentMatch[1];
+      const stars = indentMatch[2];
+      let title = indentMatch[3].trim() || 'Untitled';
+
+      // Calculate level based on both indentation and star count
+      // Each 2 spaces of indentation = +1 level
+      const indentLevel = Math.floor(indent.length / 2);
+      const level = stars.length + indentLevel;
+
+      // Apply clean view transformations (remove TODO keywords)
+      title = this.applyCleanView(title, level);
+
+      // Only convert paths if title contains path-like characters
+      if (title.includes('/') || title.includes('\\')) {
+        title = this.convertToRelativePath(title, currentDir);
+      }
+
+      // Create range for the heading line only
+      const range = new vscode.Range(i, 0, i, line.length);
+
+      const symbol = new vscode.DocumentSymbol(
+        title,
+        '',
+        vscode.SymbolKind.String,
+        range,
+        range
+      );
+
+      symbolsWithLevel[symbolIndex++] = { symbol, level, line: i };
+    }
+
+    // Trim array to actual size
+    symbolsWithLevel.length = symbolIndex;
+
+    return this.buildHierarchy(symbolsWithLevel);
+  }
+
+  /**
+   * Process document symbols in standard org-mode
+   */
+  private processStandardMode(
+    lines: string[],
+    document: vscode.TextDocument,
+    token: vscode.CancellationToken
+  ): vscode.DocumentSymbol[] {
     // Quick scan to count potential headings (pre-allocate array)
     let headingCount = 0;
     for (let i = 0; i < lines.length; i++) {
@@ -42,7 +148,7 @@ export class OrgDocumentSymbolProvider
       ? workspaceFolder.uri.fsPath
       : path.dirname(document.uri.fsPath);
 
-    // Process lines
+    // Process lines for standard mode
     for (let i = 0; i < lines.length; i++) {
       // Check cancellation less frequently (every 100 lines)
       if (i % 100 === 0 && token.isCancellationRequested) {
@@ -51,7 +157,7 @@ export class OrgDocumentSymbolProvider
 
       const line = lines[i];
 
-      // Quick check before expensive regex
+      // Standard org-mode: only headings starting from beginning of line
       if (!line.startsWith('*')) continue;
 
       const match = line.match(OrgDocumentSymbolProvider.HEADING_REGEX);
@@ -59,6 +165,8 @@ export class OrgDocumentSymbolProvider
 
       const level = match[1].length;
       let title = match[2].trim() || 'Untitled';
+
+      // In standard mode, keep TODO keywords as-is
 
       // Only convert paths if title contains path-like characters
       if (title.includes('/') || title.includes('\\')) {
@@ -139,5 +247,19 @@ export class OrgDocumentSymbolProvider
     }
 
     return result;
+  }
+
+  /**
+   * Apply clean view transformations to the title
+   */
+  private applyCleanView(title: string, level: number): string {
+    // Remove TODO keywords
+    const todoMatch = title.match(
+      OrgDocumentSymbolProvider.TODO_KEYWORDS_REGEX
+    );
+    if (todoMatch) {
+      return todoMatch[2].trim();
+    }
+    return title;
   }
 }

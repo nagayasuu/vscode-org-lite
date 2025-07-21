@@ -25,15 +25,38 @@ export function activate(context: vscode.ExtensionContext) {
     const line = editor.document.lineAt(position.line);
     const lineText = line.text;
 
-    // Check if current line is a heading (starts with *)
-    const headingMatch = lineText.match(/^(\*+)\s+(.*)$/);
+    // Get clean view configuration to handle indented headings
+    const config = vscode.workspace.getConfiguration('org-lite.outline');
+    const cleanView = config.get<boolean>('cleanView', false);
+
+    // Check if current line is a heading
+    let headingMatch;
+    let stars: string = '';
+    let content: string = '';
+    let indent: string = '';
+
+    if (cleanView) {
+      // In clean view, handle both standard and indented headings
+      headingMatch = lineText.match(/^(\s*)(\*{1,6})\s+(.+)$/);
+      if (headingMatch) {
+        // For indented headings, preserve the indentation
+        indent = headingMatch[1];
+        stars = headingMatch[2];
+        content = headingMatch[3];
+      }
+    } else {
+      // Standard org-mode: only headings starting from beginning of line
+      headingMatch = lineText.match(/^(\*+)\s+(.*)$/);
+      if (headingMatch) {
+        stars = headingMatch[1];
+        content = headingMatch[2];
+      }
+    }
+
     if (!headingMatch) {
       vscode.window.showInformationMessage('Cursor must be on a heading line');
       return;
     }
-
-    const stars = headingMatch[1];
-    const content = headingMatch[2];
 
     let newLineText: string;
 
@@ -41,25 +64,25 @@ export function activate(context: vscode.ExtensionContext) {
       // Reverse direction: DONE -> TODO -> (unmarked)
       if (content.startsWith('DONE ')) {
         // DONE -> TODO
-        newLineText = `${stars} TODO ${content.substring(5)}`;
+        newLineText = `${indent}${stars} TODO ${content.substring(5)}`;
       } else if (content.startsWith('TODO ')) {
         // TODO -> (unmarked)
-        newLineText = `${stars} ${content.substring(5)}`;
+        newLineText = `${indent}${stars} ${content.substring(5)}`;
       } else {
         // (unmarked) -> DONE
-        newLineText = `${stars} DONE ${content}`;
+        newLineText = `${indent}${stars} DONE ${content}`;
       }
     } else {
       // Forward direction: (unmarked) -> TODO -> DONE
       if (content.startsWith('TODO ')) {
         // TODO -> DONE
-        newLineText = `${stars} DONE ${content.substring(5)}`;
+        newLineText = `${indent}${stars} DONE ${content.substring(5)}`;
       } else if (content.startsWith('DONE ')) {
         // DONE -> (unmarked)
-        newLineText = `${stars} ${content.substring(5)}`;
+        newLineText = `${indent}${stars} ${content.substring(5)}`;
       } else {
         // (unmarked) -> TODO
-        newLineText = `${stars} TODO ${content}`;
+        newLineText = `${indent}${stars} TODO ${content}`;
       }
     }
 
