@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Org",
   "scopeName": "source.org",
-  "patterns": [{ "include": "#heading" }, { "include": "#indented-heading" }],
+  "patterns": [{ "include": "#heading" }],
   "repository": {
     "heading": {
       "patterns": [
@@ -17,65 +17,7 @@
         },
         {
           "name": "heading.2.markdown",
-          "match": "^(\\*{2})\\s+(?:(TODO)\\s+)?(.*?)$",
-          "captures": {
-            "2": {
-              "name": "keyword.control.todo.org"
-            }
-          }
-        },
-        {
-          "name": "heading.3.markdown",
-          "match": "^(\\*{3})\\s+(?:(TODO)\\s+)?(.*?)$",
-          "captures": {
-            "2": {
-              "name": "keyword.control.todo.org"
-            }
-          }
-        },
-        {
-          "name": "heading.4.markdown",
-          "match": "^(\\*{4})\\s+(?:(TODO)\\s+)?(.*?)$",
-          "captures": {
-            "2": {
-              "name": "keyword.control.todo.org"
-            }
-          }
-        },
-        {
-          "name": "heading.5.markdown",
-          "match": "^(\\*{5})\\s+(?:(TODO)\\s+)?(.*?)$",
-          "captures": {
-            "2": {
-              "name": "keyword.control.todo.org"
-            }
-          }
-        },
-        {
-          "name": "heading.6.markdown",
-          "match": "^(\\*{6})\\s+(?:(TODO)\\s+)?(.*?)$",
-          "captures": {
-            "2": {
-              "name": "keyword.control.todo.org"
-            }
-          }
-        }
-      ]
-    },
-    "indented-heading": {
-      "patterns": [
-        {
-          "name": "heading.1.markdown",
-          "match": "^(\\*)\\s+(?:(TODO)\\s+)?(.*?)$",
-          "captures": {
-            "3": {
-              "name": "keyword.control.todo.org"
-            }
-          }
-        },
-        {
-          "name": "heading.2.markdown",
-          "match": "^(  )(\\*+)\\s+(?:(TODO)\\s+)?(.*?)$",
+          "match": "^(  )(\\*)\\s+(?:(TODO)\\s+)?(.*?)$",
           "captures": {
             "3": {
               "name": "keyword.control.todo.org"
@@ -84,7 +26,7 @@
         },
         {
           "name": "heading.3.markdown",
-          "match": "^(    )(\\*+)\\s+(?:(TODO)\\s+)?(.*?)$",
+          "match": "^(    )(\\*)\\s+(?:(TODO)\\s+)?(.*?)$",
           "captures": {
             "3": {
               "name": "keyword.control.todo.org"
@@ -93,7 +35,7 @@
         },
         {
           "name": "heading.4.markdown",
-          "match": "^(      )(\\*+)\\s+(?:(TODO)\\s+)?(.*?)$",
+          "match": "^(      )(\\*)\\s+(?:(TODO)\\s+)?(.*?)$",
           "captures": {
             "3": {
               "name": "keyword.control.todo.org"
@@ -102,7 +44,7 @@
         },
         {
           "name": "heading.5.markdown",
-          "match": "^(        )(\\*+)\\s+(?:(TODO)\\s+)?(.*?)$",
+          "match": "^(        )(\\*)\\s+(?:(TODO)\\s+)?(.*?)$",
           "captures": {
             "3": {
               "name": "keyword.control.todo.org"
@@ -111,7 +53,7 @@
         },
         {
           "name": "heading.6.markdown",
-          "match": "^(          )(\\*+)\\s+(?:(TODO)\\s+)?(.*?)$",
+          "match": "^(          )(\\*)\\s+(?:(TODO)\\s+)?(.*?)$",
           "captures": {
             "3": {
               "name": "keyword.control.todo.org"
