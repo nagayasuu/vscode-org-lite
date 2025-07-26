@@ -19,7 +19,7 @@
           "name": "heading.2.markdown",
           "match": "^(  )(\\*+)\\s+(?:(TODO)\\s+)?(.*?)$",
           "captures": {
-            "2": {
+            "3": {
               "name": "keyword.control.todo.org"
             }
           }
@@ -28,7 +28,7 @@
           "name": "heading.3.markdown",
           "match": "^(    )(\\*+)\\s+(?:(TODO)\\s+)?(.*?)$",
           "captures": {
-            "2": {
+            "3": {
               "name": "keyword.control.todo.org"
             }
           }
@@ -37,7 +37,7 @@
           "name": "heading.4.markdown",
           "match": "^(      )(\\*+)\\s+(?:(TODO)\\s+)?(.*?)$",
           "captures": {
-            "2": {
+            "3": {
               "name": "keyword.control.todo.org"
             }
           }
@@ -46,7 +46,7 @@
           "name": "heading.5.markdown",
           "match": "^(        )(\\*+)\\s+(?:(TODO)\\s+)?(.*?)$",
           "captures": {
-            "2": {
+            "3": {
               "name": "keyword.control.todo.org"
             }
           }
@@ -55,7 +55,7 @@
           "name": "heading.6.markdown",
           "match": "^(          )(\\*+)\\s+(?:(TODO)\\s+)?(.*?)$",
           "captures": {
-            "2": {
+            "3": {
               "name": "keyword.control.todo.org"
             }
           }
