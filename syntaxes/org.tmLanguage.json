@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Org",
   "scopeName": "source.org",
-  "patterns": [{ "include": "#heading" }],
+  "patterns": [{ "include": "#heading" }, { "include": "#bold" }],
   "repository": {
     "heading": {
       "patterns": [
@@ -59,6 +59,14 @@
               "name": "keyword.control.todo.org"
             }
           }
+        }
+      ]
+    },
+    "bold": {
+      "patterns": [
+        {
+          "name": "markup.bold",
+          "match": "\\*(.*?)\\*"
         }
       ]
     }
