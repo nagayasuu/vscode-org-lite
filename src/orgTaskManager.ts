@@ -49,32 +49,18 @@ export class OrgTaskManager {
     const line = editor.document.lineAt(position.line);
     const lineText = line.text;
 
-    // Get clean view configuration to handle indented headings
-    const config = vscode.workspace.getConfiguration('org-lite.outline');
-    const cleanView = config.get<boolean>('cleanView', false);
-
     // Check if current line is a heading
     let headingMatch;
     let stars: string = '';
     let content: string = '';
     let indent: string = '';
 
-    if (cleanView) {
-      // In clean view, handle both standard and indented headings
-      headingMatch = lineText.match(/^(\s*)(\*{1,6})\s+(.+)$/);
-      if (headingMatch) {
-        // For indented headings, preserve the indentation
-        indent = headingMatch[1];
-        stars = headingMatch[2];
-        content = headingMatch[3];
-      }
-    } else {
-      // Standard org-mode: only headings starting from beginning of line
-      headingMatch = lineText.match(/^(\*+)\s+(.*)$/);
-      if (headingMatch) {
-        stars = headingMatch[1];
-        content = headingMatch[2];
-      }
+    headingMatch = lineText.match(/^(\s*)(\*)\s+(.+)$/);
+    if (headingMatch) {
+      // For indented headings, preserve the indentation
+      indent = headingMatch[1];
+      stars = headingMatch[2];
+      content = headingMatch[3];
     }
 
     if (!headingMatch) {
