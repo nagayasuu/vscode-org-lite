@@ -5,9 +5,9 @@ export class OrgTableManager {
    * org-mode table formatting command
    */
   public static registerCommands(context: vscode.ExtensionContext): void {
-    // Register org-lite.formatTableOnTab command
+    // Register org-lite.tableTabAction command
     const formatTableDisposable = vscode.commands.registerCommand(
-      'org-lite.formatTableOnTab',
+      'org-lite.tableTabAction',
       async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor || editor.document.languageId !== 'org') {
@@ -24,8 +24,44 @@ export class OrgTableManager {
           const rows = splitTableRows(tableLines);
           const colWidths = calcColWidths(rows);
 
+          // If the current line is a separator line, format it as a separator
           if (isSeparatorLine(lineText)) {
             await formatAndInsertSeparator(editor, pos.line, colWidths);
+            return;
+          }
+
+          // Tab key cell navigation
+          const currentRowText = editor.document.lineAt(pos.line).text;
+          const cellMatches = [...currentRowText.matchAll(/\|/g)];
+          let cellIdx = 0;
+          for (let i = 0; i < cellMatches.length - 1; i++) {
+            const start = cellMatches[i].index ?? 0;
+            const end = cellMatches[i + 1].index ?? 0;
+            if (pos.character >= start && pos.character < end) {
+              cellIdx = i;
+              break;
+            }
+          }
+          // Move to next cell in the row, or first cell of next row
+          let nextCellPos: vscode.Position | null = null;
+          if (cellIdx < cellMatches.length - 2) {
+            // Next cell in the same row
+            const nextCellStart = cellMatches[cellIdx + 1].index ?? 0;
+            // Skip space after '|'
+            let offset = nextCellStart + 1;
+            if (currentRowText[offset] === ' ') offset++;
+            nextCellPos = new vscode.Position(pos.line, offset);
+          } else if (pos.line < endLine) {
+            // First cell of next row
+            const nextRowText = editor.document.lineAt(pos.line + 1).text;
+            const firstCell = nextRowText.indexOf('| ');
+            if (firstCell !== -1) {
+              nextCellPos = new vscode.Position(pos.line + 1, firstCell + 2);
+            }
+          }
+
+          if (nextCellPos) {
+            editor.selection = new vscode.Selection(nextCellPos, nextCellPos);
             return;
           }
 
