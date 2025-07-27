@@ -123,12 +123,41 @@ function isSeparatorLine(text: string): boolean {
   return /^\|[-+| ]*$/.test(text.trim()) && text.includes('-');
 }
 
+// Function to get the latest column widths of the current table range
+function getLatestColWidths(editor: vscode.TextEditor, line: number): number[] {
+  let startLine = line,
+    endLine = line;
+  const doc = editor.document;
+  // Search upwards
+  while (startLine > 0 && isTableLine(doc.lineAt(startLine - 1).text)) {
+    startLine--;
+  }
+  // Search downwards
+  while (
+    endLine < doc.lineCount - 1 &&
+    isTableLine(doc.lineAt(endLine + 1).text)
+  ) {
+    endLine++;
+  }
+  const tableLines: string[] = [];
+  for (let i = startLine; i <= endLine; i++) {
+    const t = doc.lineAt(i).text;
+    if (!isSeparatorLine(t)) tableLines.push(t);
+  }
+  const rows = splitTableRows(tableLines);
+  const colWidths = calcColWidths(rows);
+  // If the number of columns is 0, use 2 columns with width 3
+  return colWidths.length === 0 ? [3, 3] : colWidths;
+}
+
 // Format and insert separator line and empty row
 async function formatAndInsertSeparator(
   editor: vscode.TextEditor,
   line: number,
   colWidths: number[]
 ) {
+  // Get the latest column widths of the current table range
+  colWidths = getLatestColWidths(editor, line);
   const sep = formatSeparatorLine(colWidths);
   const emptyRow = formatEmptyRow(colWidths);
   await editor.edit(editBuilder => {
@@ -150,9 +179,11 @@ async function formatAndInsertTable(
   rows: string[][],
   colWidths: number[]
 ) {
+  // Get the latest column widths of the current table range
+  colWidths = getLatestColWidths(editor, startLine);
   const formatted = rows.map(row => {
-    // If the row is a separator line, format as separator
-    if (isSeparatorLine('|' + row.join('|') + '|')) {
+    // Separator lines are regenerated with formatSeparatorLine
+    if (row.length === 1 && row[0] === '__SEPARATOR__') {
       return formatSeparatorLine(colWidths);
     }
     return formatTableRow(row, colWidths);
@@ -212,12 +243,28 @@ function getTableLines(
 
 // Split table rows into cells
 function splitTableRows(tableLines: string[]): string[][] {
-  return tableLines.map(line =>
-    line
+  // First, estimate the maximum number of columns
+  const cellCounts = tableLines
+    .filter(line => !isSeparatorLine(line))
+    .map(
+      line =>
+        line
+          .trim()
+          .split(/\s*\|\s*/)
+          .filter(cell => cell.length > 0).length
+    );
+  const maxCols = cellCounts.length > 0 ? Math.max(...cellCounts) : 0;
+
+  return tableLines.map(line => {
+    if (isSeparatorLine(line)) {
+      // Separator lines are stored as arrays with a special flag
+      return ['__SEPARATOR__'];
+    }
+    return line
       .trim()
       .split(/\s*\|\s*/)
-      .filter(cell => cell.length > 0)
-  );
+      .filter(cell => cell.length > 0);
+  });
 }
 
 // Display width calculation function (full-width: 2, half-width: 1)
