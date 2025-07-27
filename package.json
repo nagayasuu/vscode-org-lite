@@ -44,6 +44,10 @@
       {
         "command": "org-lite.showAgenda",
         "title": "Show Agenda View"
+      },
+      {
+        "command": "org-lite.formatTableOnTab",
+        "title": "Format Org Table"
       }
     ],
     "keybindings": [
@@ -56,6 +60,11 @@
         "command": "org-lite.rotateTodoReverse",
         "key": "alt+left",
         "when": "editorLangId == org"
+      },
+      {
+        "command": "org-lite.formatTableOnTab",
+        "key": "tab",
+        "when": "editorTextFocus && editorLangId == org && orgTableLineFocus"
       }
     ]
   },
