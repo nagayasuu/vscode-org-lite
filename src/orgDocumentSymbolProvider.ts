@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 export class OrgDocumentSymbolProvider
   implements vscode.DocumentSymbolProvider
 {
-  // Cache regex for better performance
+  // Regex cache for performance
   private static readonly HEADING_REGEX = /^(\s*)(\*)\s+(.+)$/;
   private static readonly PATH_REGEX = /([\/\\]?[\w\-\.\/\\]+(?:\.[\w]+)?)/g;
   private static readonly TODO_KEYWORDS_REGEX = /^(TODO|DONE)\s+(.*)$/;
@@ -15,13 +15,8 @@ export class OrgDocumentSymbolProvider
   ): vscode.ProviderResult<vscode.DocumentSymbol[]> {
     const text = document.getText();
 
-    // Early return for empty documents
-    if (!text.trim()) {
-      return [];
-    }
-
+    if (!text.trim()) return [];
     const lines = text.split('\n');
-
     return this.processCleanViewMode(lines, document, token);
   }
 
@@ -33,63 +28,34 @@ export class OrgDocumentSymbolProvider
     document: vscode.TextDocument,
     token: vscode.CancellationToken
   ): vscode.DocumentSymbol[] {
-    // Quick scan to count potential headings (pre-allocate array)
-    let headingCount = 0;
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (line.trim().startsWith('*') || line.match(/^\s+\*/)) headingCount++;
-    }
-
-    // Pre-allocate array with estimated size
+    // Pre-allocate array for headings
     const symbolsWithLevel: Array<{
       symbol: vscode.DocumentSymbol;
       level: number;
       line: number;
-    }> = new Array(headingCount);
-
-    let symbolIndex = 0;
-
-    // Get current workspace folder once
+    }> = [];
     const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
     const currentDir = workspaceFolder
       ? workspaceFolder.uri.fsPath
       : path.dirname(document.uri.fsPath);
-
-    // Process lines for clean view mode
     for (let i = 0; i < lines.length; i++) {
-      // Check cancellation less frequently (every 100 lines)
-      if (i % 100 === 0 && token.isCancellationRequested) {
-        return [];
-      }
-
+      if (i % 100 === 0 && token.isCancellationRequested) return [];
       const line = lines[i];
-
-      // Clean view mode: support indented headings with space-based level calculation
       if (!line.trim().startsWith('*')) continue;
-
-      const indentMatch = line.match(OrgDocumentSymbolProvider.HEADING_REGEX);
-      if (!indentMatch) continue;
-
-      const indent = indentMatch[1];
-      const stars = indentMatch[2];
-      let title = indentMatch[3].trim() || 'Untitled';
-
-      // Calculate level based on both indentation and star count
-      // Each 2 spaces of indentation = +1 level
+      const match = OrgDocumentSymbolProvider.HEADING_REGEX.exec(line);
+      if (!match) continue;
+      const [, indent, stars, rawTitle] = match;
+      let title = rawTitle.trim() || 'Untitled';
+      // Calculate level: each 2 spaces of indentation = +1 level
       const indentLevel = Math.floor(indent.length / 2);
       const level = stars.length + indentLevel;
-
-      // Apply clean view transformations (remove TODO keywords)
+      // Remove TODO keywords
       title = this.applyCleanView(title, level);
-
-      // Only convert paths if title contains path-like characters
+      // Convert paths if needed
       if (title.includes('/') || title.includes('\\')) {
         title = this.convertToRelativePath(title, currentDir);
       }
-
-      // Create range for the heading line only
       const range = new vscode.Range(i, 0, i, line.length);
-
       const symbol = new vscode.DocumentSymbol(
         title,
         '',
@@ -97,13 +63,8 @@ export class OrgDocumentSymbolProvider
         range,
         range
       );
-
-      symbolsWithLevel[symbolIndex++] = { symbol, level, line: i };
+      symbolsWithLevel.push({ symbol, level, line: i });
     }
-
-    // Trim array to actual size
-    symbolsWithLevel.length = symbolIndex;
-
     return this.buildHierarchy(symbolsWithLevel);
   }
 
@@ -111,17 +72,15 @@ export class OrgDocumentSymbolProvider
     // Use cached regex
     return title.replace(OrgDocumentSymbolProvider.PATH_REGEX, match => {
       try {
-        // Check if it's an absolute path
         if (path.isAbsolute(match)) {
           const relativePath = path.relative(currentDir, match);
-          // Only replace if the relative path is shorter or starts with ..
           return relativePath.length < match.length ||
             relativePath.startsWith('..')
             ? relativePath
             : match;
         }
       } catch (error) {
-        // If path operations fail, return original
+        console.warn('Path conversion failed:', error);
       }
       return match;
     });

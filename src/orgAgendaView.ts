@@ -1,3 +1,4 @@
+import * as os from 'os';
 import * as vscode from 'vscode';
 
 let agendaContent = '';
@@ -27,7 +28,7 @@ export async function showAgendaView() {
       agendaItems.push('');
     }
   }
-  agendaContent = agendaItems.join('\n');
+  agendaContent = agendaItems.join(os.EOL);
 
   // Register provider on first use
   const uri = vscode.Uri.parse('org-agenda:AgendaView.code-search');

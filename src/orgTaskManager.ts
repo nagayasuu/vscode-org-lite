@@ -33,11 +33,8 @@ export class OrgTaskManager {
    */
   private static rotateTodoState(reverse: boolean = false): void {
     const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      return;
-    }
+    if (!editor) return;
 
-    // Check if current file is .org file
     if (editor.document.languageId !== 'org') {
       vscode.window.showWarningMessage(
         'This command is only available in Org files'
@@ -46,66 +43,41 @@ export class OrgTaskManager {
     }
 
     const position = editor.selection.active;
-    const line = editor.document.lineAt(position.line);
-    const lineText = line.text;
-
-    // Check if current line is a heading
-    let headingMatch;
-    let stars: string = '';
-    let content: string = '';
-    let indent: string = '';
-
-    headingMatch = lineText.match(/^(\s*)(\*)\s+(.+)$/);
-    if (headingMatch) {
-      // For indented headings, preserve the indentation
-      indent = headingMatch[1];
-      stars = headingMatch[2];
-      content = headingMatch[3];
-    }
-
+    const lineText = editor.document.lineAt(position.line).text;
+    const headingMatch = lineText.match(/^(\s*)(\*)\s+(.*)$/);
     if (!headingMatch) {
       vscode.window.showInformationMessage('Cursor must be on a heading line');
       return;
     }
+    const [, indent, stars, content] = headingMatch;
 
-    let newLineText: string;
-
+    let newLineText = '';
+    const todo = 'TODO ';
+    const done = 'DONE ';
     if (reverse) {
-      // Reverse direction: DONE -> TODO -> (unmarked)
-      if (content.startsWith('DONE ')) {
-        // DONE -> TODO
-        newLineText = `${indent}${stars} TODO ${content.substring(5)}`;
-      } else if (content.startsWith('TODO ')) {
-        // TODO -> (unmarked)
-        newLineText = `${indent}${stars} ${content.substring(5)}`;
+      if (content.startsWith(done)) {
+        newLineText = `${indent}${stars} ${todo}${content.slice(done.length)}`;
+      } else if (content.startsWith(todo)) {
+        newLineText = `${indent}${stars} ${content.slice(todo.length)}`;
       } else {
-        // (unmarked) -> DONE
-        newLineText = `${indent}${stars} DONE ${content}`;
+        newLineText = `${indent}${stars} ${done}${content}`;
       }
     } else {
-      // Forward direction: (unmarked) -> TODO -> DONE
-      if (content.startsWith('TODO ')) {
-        // TODO -> DONE
-        newLineText = `${indent}${stars} DONE ${content.substring(5)}`;
-      } else if (content.startsWith('DONE ')) {
-        // DONE -> (unmarked)
-        newLineText = `${indent}${stars} ${content.substring(5)}`;
+      if (content.startsWith(todo)) {
+        newLineText = `${indent}${stars} ${done}${content.slice(todo.length)}`;
+      } else if (content.startsWith(done)) {
+        newLineText = `${indent}${stars} ${content.slice(done.length)}`;
       } else {
-        // (unmarked) -> TODO
-        newLineText = `${indent}${stars} TODO ${content}`;
+        newLineText = `${indent}${stars} ${todo}${content}`;
       }
     }
 
-    // Replace text
     const range = new vscode.Range(
       position.line,
       0,
       position.line,
       lineText.length
     );
-
-    editor.edit(editBuilder => {
-      editBuilder.replace(range, newLineText);
-    });
+    editor.edit(editBuilder => editBuilder.replace(range, newLineText));
   }
 }

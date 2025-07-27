@@ -18,13 +18,13 @@ export function activate(context: vscode.ExtensionContext) {
       new OrgDocumentSymbolProvider()
     );
 
-  context.subscriptions.push(documentSymbolProvider);
-
   const showAgendaCommand = vscode.commands.registerCommand(
     'org-lite.showAgenda',
     showAgendaView
   );
-  context.subscriptions.push(showAgendaCommand);
+
+  // Push all disposables at once for clarity
+  context.subscriptions.push(documentSymbolProvider, showAgendaCommand);
 }
 
 // This method is called when your extension is deactivated
