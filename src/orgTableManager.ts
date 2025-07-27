@@ -101,7 +101,13 @@ async function formatAndInsertTable(
   rows: string[][],
   colWidths: number[]
 ) {
-  const formatted = rows.map(row => formatTableRow(row, colWidths));
+  const formatted = rows.map(row => {
+    // If the row is a separator line, format as separator
+    if (isSeparatorLine('|' + row.join('|') + '|')) {
+      return formatSeparatorLine(colWidths);
+    }
+    return formatTableRow(row, colWidths);
+  });
   formatted.push(formatEmptyRow(colWidths));
   await editor.edit(editBuilder => {
     for (let i = startLine; i <= endLine; i++) {
