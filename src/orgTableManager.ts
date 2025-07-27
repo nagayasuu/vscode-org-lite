@@ -17,7 +17,7 @@ export class OrgTableManager {
         const lineText = editor.document.lineAt(pos.line).text;
         // Use table line detection function
         const tableLine = isTableLine(lineText);
-        if (tableLine && pos.character === lineText.length) {
+        if (tableLine) {
           // Table formatting process
           let startLine = pos.line;
           let endLine = pos.line;
@@ -70,6 +70,27 @@ export class OrgTableManager {
                 getDisplayWidth(row[c] || '')
               );
             }
+          }
+
+          // Separator line logic: if current line is a separator (e.g. "|-"), fill with dashes
+          const separatorLine = /^\|[-+ ]*\|$/.test(lineText.trim());
+          if (separatorLine) {
+            // Format separator line: |-----| style
+            const sep =
+              '|' + colWidths.map(w => '-'.repeat(w + 2)).join('|') + '|';
+            // Create empty row below separator line
+            const emptyRow =
+              '| ' + colWidths.map(w => ' '.repeat(w)).join(' | ') + ' |';
+            await editor.edit(editBuilder => {
+              editBuilder.replace(editor.document.lineAt(pos.line).range, sep);
+              // Insert empty row below
+              const sepEnd = editor.document.lineAt(pos.line).range.end;
+              editBuilder.insert(sepEnd, '\n' + emptyRow);
+            });
+            // Move cursor to just after "| " of the new empty row
+            const newPos = new vscode.Position(pos.line + 1, 2);
+            editor.selection = new vscode.Selection(newPos, newPos);
+            return;
           }
 
           // Format table rows (normal rows only)
