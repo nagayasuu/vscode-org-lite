@@ -15,8 +15,9 @@ export class OrgTableManager {
         }
         const pos = editor.selection.active;
         const lineText = editor.document.lineAt(pos.line).text;
-        const isTableLine = /\|[^\s\|]+/.test(lineText);
-        if (isTableLine && pos.character === lineText.length) {
+        // Use table line detection function
+        const tableLine = isTableLine(lineText);
+        if (tableLine && pos.character === lineText.length) {
           // Table formatting process
           let startLine = pos.line;
           let endLine = pos.line;
@@ -125,6 +126,11 @@ export class OrgTableManager {
   }
 }
 
+// Table line detection function (any string starting with '|')
+function isTableLine(text: string): boolean {
+  return /^\|.*/.test(text);
+}
+
 // orgTableLineFocus context key management function (declared outside the class)
 function updateOrgTableLineFocus() {
   const editor = vscode.window.activeTextEditor;
@@ -134,11 +140,7 @@ function updateOrgTableLineFocus() {
   }
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
-  const isTableLine = /\|[^\s\|]+/.test(lineText);
+  const tableLine = isTableLine(lineText);
 
-  vscode.commands.executeCommand(
-    'setContext',
-    'orgTableLineFocus',
-    isTableLine
-  );
+  vscode.commands.executeCommand('setContext', 'orgTableLineFocus', tableLine);
 }
