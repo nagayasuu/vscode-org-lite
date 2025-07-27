@@ -70,7 +70,8 @@ function calcColWidths(rows: string[][]): number[] {
 
 // Separator line detection
 function isSeparatorLine(text: string): boolean {
-  return /^\|[-+ ]*\|$/.test(text.trim());
+  // Lines starting with "|-", or lines composed only of "|", "-", and "+"
+  return /^\|[-+| ]*$/.test(text.trim()) && text.includes('-');
 }
 
 // Format and insert separator line and empty row
