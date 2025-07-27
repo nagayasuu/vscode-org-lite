@@ -40,6 +40,10 @@
       {
         "command": "org-lite.rotateTodoReverse",
         "title": "Rotate TODO state (reverse)"
+      },
+      {
+        "command": "org-lite.showAgenda",
+        "title": "Show Agenda View"
       }
     ],
     "keybindings": [
