@@ -1,5 +1,8 @@
 import * as vscode from 'vscode';
 
+let agendaContent = '';
+let agendaEmitter: vscode.EventEmitter<vscode.Uri> | undefined;
+
 export async function showAgendaView() {
   // Search for Org files
   const orgFiles = await vscode.workspace.findFiles('**/*.org');
@@ -20,17 +23,25 @@ export async function showAgendaView() {
     if (fileItems.length > 0) {
       agendaItems.push(`${vscode.workspace.asRelativePath(file)}:`);
       agendaItems.push(...fileItems);
-      agendaItems.push(''); // Separator between files
+      // Separator between files
+      agendaItems.push('');
     }
   }
+  agendaContent = agendaItems.join('\n');
 
-  // Create a virtual document for the Agenda View
-  const agendaContent = agendaItems.join('\n');
+  // Register provider on first use
   const uri = vscode.Uri.parse('org-agenda:AgendaView.code-search');
-  vscode.workspace.registerTextDocumentContentProvider('org-agenda', {
-    provideTextDocumentContent: () => agendaContent,
-  });
+  if (!agendaEmitter) {
+    agendaEmitter = new vscode.EventEmitter<vscode.Uri>();
+    vscode.workspace.registerTextDocumentContentProvider('org-agenda', {
+      provideTextDocumentContent: () => agendaContent,
+      onDidChange: agendaEmitter.event,
+    });
+  }
 
-  // Show the virtual document in the editor
+  // Fire content change event to reload
+  agendaEmitter.fire(uri);
+
+  // Show virtual document
   await vscode.window.showTextDocument(uri, { preview: false });
 }
