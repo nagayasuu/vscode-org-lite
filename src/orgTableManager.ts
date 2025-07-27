@@ -31,35 +31,12 @@ export class OrgTableManager {
           }
 
           // Tab key cell navigation
-          const currentRowText = editor.document.lineAt(pos.line).text;
-          const cellMatches = [...currentRowText.matchAll(/\|/g)];
-          let cellIdx = 0;
-          for (let i = 0; i < cellMatches.length - 1; i++) {
-            const start = cellMatches[i].index ?? 0;
-            const end = cellMatches[i + 1].index ?? 0;
-            if (pos.character >= start && pos.character < end) {
-              cellIdx = i;
-              break;
-            }
-          }
-          // Move to next cell in the row, or first cell of next row
-          let nextCellPos: vscode.Position | null = null;
-          if (cellIdx < cellMatches.length - 2) {
-            // Next cell in the same row
-            const nextCellStart = cellMatches[cellIdx + 1].index ?? 0;
-            // Skip space after '|'
-            let offset = nextCellStart + 1;
-            if (currentRowText[offset] === ' ') offset++;
-            nextCellPos = new vscode.Position(pos.line, offset);
-          } else if (pos.line < endLine) {
-            // First cell of next row
-            const nextRowText = editor.document.lineAt(pos.line + 1).text;
-            const firstCell = nextRowText.indexOf('| ');
-            if (firstCell !== -1) {
-              nextCellPos = new vscode.Position(pos.line + 1, firstCell + 2);
-            }
-          }
-
+          const nextCellPos = getNextCellPosition(
+            editor,
+            pos,
+            startLine,
+            endLine
+          );
           if (nextCellPos) {
             editor.selection = new vscode.Selection(nextCellPos, nextCellPos);
             return;
@@ -73,7 +50,6 @@ export class OrgTableManager {
             colWidths
           );
           // Move the cursor precisely to just after the "| " of the newly added empty row (the beginning of the first cell)
-          const nextLineIdx = rows.length; // formatted.length - 1
           const nextLine = formatEmptyRow(colWidths);
           let idx = nextLine.indexOf('| ') + 2;
           const newPos = new vscode.Position(pos.line + 1, idx);
@@ -90,6 +66,43 @@ export class OrgTableManager {
       vscode.window.onDidChangeActiveTextEditor(updateOrgTableLineFocus)
     );
   }
+}
+
+// Function to return the position to move to the next cell or the first cell of the next row with Tab key
+function getNextCellPosition(
+  editor: vscode.TextEditor,
+  pos: vscode.Position,
+  startLine: number,
+  endLine: number
+): vscode.Position | null {
+  const currentRowText = editor.document.lineAt(pos.line).text;
+  const cellMatches = [...currentRowText.matchAll(/\|/g)];
+  let cellIdx = 0;
+  for (let i = 0; i < cellMatches.length - 1; i++) {
+    const start = cellMatches[i].index ?? 0;
+    const end = cellMatches[i + 1].index ?? 0;
+    if (pos.character >= start && pos.character < end) {
+      cellIdx = i;
+      break;
+    }
+  }
+  // Move to next cell in the row, or first cell of next row
+  if (cellIdx < cellMatches.length - 2) {
+    // Next cell in the same row
+    const nextCellStart = cellMatches[cellIdx + 1].index ?? 0;
+    // Skip space after '|'
+    let offset = nextCellStart + 1;
+    if (currentRowText[offset] === ' ') offset++;
+    return new vscode.Position(pos.line, offset);
+  } else if (pos.line < endLine) {
+    // First cell of next row
+    const nextRowText = editor.document.lineAt(pos.line + 1).text;
+    const firstCell = nextRowText.indexOf('| ');
+    if (firstCell !== -1) {
+      return new vscode.Position(pos.line + 1, firstCell + 2);
+    }
+  }
+  return null;
 }
 
 // Calculate column widths
