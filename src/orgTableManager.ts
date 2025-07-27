@@ -86,6 +86,10 @@ function getNextCellPosition(
       break;
     }
   }
+  // If at the end of the line, always set cellIdx to the last cell section
+  if (pos.character === currentRowText.length && cellMatches.length >= 2) {
+    cellIdx = cellMatches.length - 2;
+  }
   // Move to next cell in the row, or first cell of next row
   if (cellIdx < cellMatches.length - 2) {
     // Next cell in the same row
