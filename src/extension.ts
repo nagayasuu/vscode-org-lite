@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { showAgendaView } from './orgAgendaView';
 import { OrgDocumentSymbolProvider } from './orgDocumentSymbolProvider';
 import { OrgTaskManager } from './orgTaskManager';
 
@@ -17,7 +18,13 @@ export function activate(context: vscode.ExtensionContext) {
       new OrgDocumentSymbolProvider()
     );
 
-  context.subscriptions.push(documentSymbolProvider);
+  const showAgendaCommand = vscode.commands.registerCommand(
+    'org-lite.showAgenda',
+    showAgendaView
+  );
+
+  // Push all disposables at once for clarity
+  context.subscriptions.push(documentSymbolProvider, showAgendaCommand);
 }
 
 // This method is called when your extension is deactivated
