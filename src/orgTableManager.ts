@@ -5,6 +5,33 @@ export class OrgTableManager {
    * org-mode table formatting command
    */
   public static registerCommands(context: vscode.ExtensionContext): void {
+    // Register org-lite.tableShiftTabAction command
+    const shiftTabDisposable = vscode.commands.registerCommand(
+      'org-lite.tableShiftTabAction',
+      async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor || editor.document.languageId !== 'org') {
+          return;
+        }
+        const pos = editor.selection.active;
+        const lineText = editor.document.lineAt(pos.line).text;
+        const tableLine = isTableLine(lineText);
+        if (tableLine) {
+          const { startLine, endLine } = detectTableRange(editor, pos.line);
+          const prevCellPos = getPrevCellPosition(
+            editor,
+            pos,
+            startLine,
+            endLine
+          );
+          if (prevCellPos) {
+            editor.selection = new vscode.Selection(prevCellPos, prevCellPos);
+          }
+        }
+      }
+    );
+    context.subscriptions.push(shiftTabDisposable);
+
     // Register org-lite.tableTabAction command
     const formatTableDisposable = vscode.commands.registerCommand(
       'org-lite.tableTabAction',
@@ -89,6 +116,56 @@ export class OrgTableManager {
       vscode.window.onDidChangeActiveTextEditor(updateOrgTableLineFocus)
     );
   }
+}
+
+// Function to return the position to move to the previous cell or previous row's last cell with Shift+Tab
+function getPrevCellPosition(
+  editor: vscode.TextEditor,
+  pos: vscode.Position,
+  startLine: number,
+  endLine: number
+): vscode.Position | null {
+  const currentRowText = editor.document.lineAt(pos.line).text;
+  const cellMatches = [...currentRowText.matchAll(/\|/g)];
+  let cellIdx = 0;
+  for (let i = 0; i < cellMatches.length - 1; i++) {
+    const start = cellMatches[i].index ?? 0;
+    const end = cellMatches[i + 1].index ?? 0;
+    if (pos.character > start && pos.character <= end) {
+      cellIdx = i;
+      break;
+    }
+  }
+  // If at the beginning of the line (first cell), move to the last cell of the previous row
+  if (cellIdx === 0 && pos.line > startLine) {
+    let prevLine = pos.line - 1;
+    // Skip separator lines
+    while (
+      prevLine >= startLine &&
+      isSeparatorLine(editor.document.lineAt(prevLine).text)
+    ) {
+      prevLine--;
+    }
+    if (prevLine >= startLine) {
+      const prevRowText = editor.document.lineAt(prevLine).text;
+      const prevCellMatches = [...prevRowText.matchAll(/\|/g)];
+      if (prevCellMatches.length >= 2) {
+        // Start of the last cell
+        const lastCellStart =
+          prevCellMatches[prevCellMatches.length - 2].index ?? 0;
+        let offset = lastCellStart + 1;
+        if (prevRowText[offset] === ' ') offset++;
+        return new vscode.Position(prevLine, offset);
+      }
+    }
+  } else if (cellIdx > 0) {
+    // Previous cell
+    const prevCellStart = cellMatches[cellIdx - 1].index ?? 0;
+    let offset = prevCellStart + 1;
+    if (currentRowText[offset] === ' ') offset++;
+    return new vscode.Position(pos.line, offset);
+  }
+  return null;
 }
 
 // Function to return the position to move to the next cell or the first cell of the next row with Tab key
