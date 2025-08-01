@@ -31,13 +31,36 @@ export class OrgTableManager {
           }
 
           // Tab key cell navigation
-          const nextCellPos = getNextCellPosition(
+          let nextCellPos = getNextCellPosition(
             editor,
             pos,
             startLine,
             endLine
           );
+          // Skip separator lines and move to the next cell
           if (nextCellPos) {
+            let nextLine = nextCellPos.line;
+            let nextChar = nextCellPos.character;
+            // If the destination is a separator line, move to the first cell of the next line
+            if (
+              nextLine < editor.document.lineCount &&
+              isSeparatorLine(editor.document.lineAt(nextLine).text)
+            ) {
+              // First cell of the next line
+              if (nextLine + 1 < editor.document.lineCount) {
+                const afterSepLine = editor.document.lineAt(nextLine + 1).text;
+                const firstCell = afterSepLine.indexOf('| ');
+                if (firstCell !== -1) {
+                  nextCellPos = new vscode.Position(
+                    nextLine + 1,
+                    firstCell + 2
+                  );
+                } else {
+                  // If there is no cell, move to the beginning of the line
+                  nextCellPos = new vscode.Position(nextLine + 1, 0);
+                }
+              }
+            }
             editor.selection = new vscode.Selection(nextCellPos, nextCellPos);
             return;
           }
@@ -101,9 +124,18 @@ function getNextCellPosition(
   } else if (pos.line < endLine) {
     // First cell of next row
     const nextRowText = editor.document.lineAt(pos.line + 1).text;
-    const firstCell = nextRowText.indexOf('| ');
-    if (firstCell !== -1) {
-      return new vscode.Position(pos.line + 1, firstCell + 2);
+    if (isSeparatorLine(nextRowText) && pos.line + 2 <= endLine) {
+      // If the next line is a separator, move to the first cell of the line after next
+      const afterSepText = editor.document.lineAt(pos.line + 2).text;
+      const firstCell = afterSepText.indexOf('| ');
+      if (firstCell !== -1) {
+        return new vscode.Position(pos.line + 2, firstCell + 2);
+      }
+    } else {
+      const firstCell = nextRowText.indexOf('| ');
+      if (firstCell !== -1) {
+        return new vscode.Position(pos.line + 1, firstCell + 2);
+      }
     }
   }
   return null;
