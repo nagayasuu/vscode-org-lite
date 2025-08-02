@@ -24,12 +24,14 @@ export class OrgTableManager {
           // Add a new column (refactored to insertColumn)
           await insertColumn(editor, startLine, endLine, pos.line);
         } else {
+          // Always reformat the table before moving the cursor
+          const tableLines = getTableLines(editor, startLine, endLine);
+          const rows = splitTableRows(tableLines);
+          const colWidths = calcColWidths(rows);
+          await formatTable(editor, startLine, endLine, rows, colWidths);
           // Move vertically to the cell below, or add a new row if at the last row
           if (pos.line === endLine) {
             // Add a new empty row and move the cursor to the beginning of the same column
-            const tableLines = getTableLines(editor, startLine, endLine);
-            const rows = splitTableRows(tableLines);
-            const colWidths = calcColWidths(rows);
             const emptyRow = formatEmptyRow(colWidths);
             await editor.edit(editBuilder => {
               const lastLine = editor.document.lineAt(endLine).range.end;
@@ -99,6 +101,11 @@ export class OrgTableManager {
         const tableLine = isTableLine(lineText);
         if (tableLine) {
           const { startLine, endLine } = detectTableRange(editor, pos.line);
+          const tableLines = getTableLines(editor, startLine, endLine);
+          const rows = splitTableRows(tableLines);
+          const colWidths = calcColWidths(rows);
+          // Always reformat the table before moving the cursor
+          await formatTable(editor, startLine, endLine, rows, colWidths);
           const prevCellPos = getPrevCellPosition(
             editor,
             pos,
@@ -138,6 +145,9 @@ export class OrgTableManager {
             return;
           }
 
+          // Always reformat the table before moving the cursor
+          await formatTable(editor, startLine, endLine, rows, colWidths);
+
           // Tab key cell navigation
           let nextCellPos = getNextCellPosition(
             editor,
@@ -145,7 +155,7 @@ export class OrgTableManager {
             startLine,
             endLine
           );
-          // Skip separator lines and move to the next cell
+
           if (nextCellPos) {
             let nextLine = nextCellPos.line;
             let nextChar = nextCellPos.character;
@@ -173,7 +183,6 @@ export class OrgTableManager {
             return;
           }
 
-          await formatTable(editor, startLine, endLine, rows, colWidths);
           await insertEmptyRow(editor, endLine, colWidths);
           // Move the cursor precisely to just after the "| " of the newly added empty row (the beginning of the first cell)
           const nextLine = formatEmptyRow(colWidths);
