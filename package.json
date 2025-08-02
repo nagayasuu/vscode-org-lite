@@ -44,6 +44,30 @@
       {
         "command": "org-lite.showAgenda",
         "title": "Show Agenda View"
+      },
+      {
+        "command": "org-lite.formatOrgTable",
+        "title": "Format Org Table"
+      },
+      {
+        "command": "org-lite.tableTabAction",
+        "title": "Format Org Table"
+      },
+      {
+        "command": "org-lite.tableShiftTabAction",
+        "title": "Move to Previous Org Table Cell"
+      },
+      {
+        "command": "org-lite.tableEnterAction",
+        "title": "Org Table Enter Action"
+      },
+      {
+        "command": "org-lite.tableMoveColumnLeft",
+        "title": "Move Org Table Column Left"
+      },
+      {
+        "command": "org-lite.tableMoveColumnRight",
+        "title": "Move Org Table Column Right"
       }
     ],
     "keybindings": [
@@ -56,6 +80,36 @@
         "command": "org-lite.rotateTodoReverse",
         "key": "alt+left",
         "when": "editorLangId == org"
+      },
+      {
+        "command": "org-lite.formatOrgTable",
+        "key": "tab",
+        "when": "editorTextFocus && editorLangId == org && orgTableLineFocus"
+      },
+      {
+        "command": "org-lite.tableTabAction",
+        "key": "tab",
+        "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
+      },
+      {
+        "command": "org-lite.tableShiftTabAction",
+        "key": "shift+tab",
+        "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
+      },
+      {
+        "command": "org-lite.tableEnterAction",
+        "key": "enter",
+        "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
+      },
+      {
+        "command": "org-lite.tableMoveColumnLeft",
+        "key": "ctrl+alt+left",
+        "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
+      },
+      {
+        "command": "org-lite.tableMoveColumnRight",
+        "key": "ctrl+alt+right",
+        "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
       }
     ]
   },
