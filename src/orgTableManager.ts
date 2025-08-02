@@ -1,5 +1,8 @@
 import * as vscode from 'vscode';
 
+// Special marker for separator lines in table row arrays
+const ORG_TABLE_SEPARATOR = '__SEPARATOR__';
+
 export class OrgTableManager {
   /**
    * org-mode table formatting command
@@ -231,12 +234,12 @@ async function moveTableColumn(direction: number) {
   // Get the maximum number of columns and pad all rows
   const maxCols = Math.max(
     ...rows
-      .filter(r => !(r.length === 1 && r[0] === '__SEPARATOR__'))
+      .filter(r => !(r.length === 1 && r[0] === ORG_TABLE_SEPARATOR))
       .map(r => r.length)
   );
   for (let r = 0; r < rows.length; r++) {
     const row = rows[r];
-    if (row.length === 1 && row[0] === '__SEPARATOR__') continue;
+    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) continue;
     while (row.length < maxCols) row.push('');
   }
   // Check for left/right edge
@@ -245,7 +248,7 @@ async function moveTableColumn(direction: number) {
   // Swap columns
   for (let r = 0; r < rows.length; r++) {
     const row = rows[r];
-    if (row.length === 1 && row[0] === '__SEPARATOR__') continue;
+    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) continue;
     const from = cellIdx;
     const to = cellIdx + direction;
     if (to >= 0 && to < row.length) {
@@ -385,9 +388,9 @@ function getNextCellPosition(
 
 // Calculate column widths
 function calcColWidths(rows: string[][]): number[] {
-  // Exclude separator rows (['__SEPARATOR__']) from width calculation
+  // Exclude separator rows ([ORG_TABLE_SEPARATOR]) from width calculation
   const dataRows = rows.filter(
-    row => !(row.length === 1 && row[0] === '__SEPARATOR__')
+    row => !(row.length === 1 && row[0] === ORG_TABLE_SEPARATOR)
   );
   const colCount = Math.max(...dataRows.map(r => r.length), 0);
   const colWidths = Array(colCount).fill(0);
@@ -473,7 +476,7 @@ async function formatTable(
   }
   const formatted = rows.map((row, idx) => {
     const indent = indents[idx] || '';
-    if (row.length === 1 && row[0] === '__SEPARATOR__') {
+    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) {
       return indent + formatSeparatorLine(colWidths);
     }
     return indent + formatTableRow(row, colWidths);
@@ -552,7 +555,7 @@ function splitTableRows(tableLines: string[]): string[][] {
   return tableLines.map(line => {
     if (isSeparatorLine(line)) {
       // Separator lines are stored as arrays with a special flag
-      return ['__SEPARATOR__'];
+      return [ORG_TABLE_SEPARATOR];
     }
     // Treat empty cells as empty elements, but exclude leading/trailing empty elements
     return splitTableLineToCells(line);
