@@ -50,7 +50,7 @@ export class OrgTableManager {
             // Add a new empty row and move the cursor to the beginning of the same column
             const m = lineText.match(/^([ \t]*)/);
             const indent = m ? m[1] : '';
-            const emptyRow = indent + formatEmptyRow(colWidths);
+            const emptyRow = formatEmptyRow(colWidths, indent);
             await editor.edit(editBuilder => {
               const lastLine = editor.document.lineAt(endLine).range.end;
               editBuilder.insert(lastLine, '\n' + emptyRow);
@@ -202,11 +202,11 @@ export class OrgTableManager {
 
           await insertEmptyRow(editor, endLine, colWidths);
           // Move the cursor precisely to just after the "| " of the newly added empty row (the beginning of the first cell, considering indentation)
-          const nextLine = formatEmptyRow(colWidths);
           const origLine = editor.document.lineAt(pos.line).text;
           const m = origLine.match(/^([ \t]*)/);
-          const indentLen = m ? m[1].length : 0;
-          let idx = nextLine.indexOf('| ') + 2 + indentLen;
+          const indent = m ? m[1] : '';
+          const nextLine = formatEmptyRow(colWidths, indent);
+          let idx = nextLine.indexOf('| ') + 2;
           const newPos = new vscode.Position(pos.line + 1, idx);
           editor.selection = new vscode.Selection(newPos, newPos);
         }
@@ -485,7 +485,7 @@ async function insertSeparatorLine(
   const m = origLine.match(/^([ \t]*)/);
   const indent = m ? m[1] : '';
   const sep = indent + formatSeparatorLine(colWidths);
-  const emptyRow = indent + formatEmptyRow(colWidths);
+  const emptyRow = formatEmptyRow(colWidths, indent);
   await editor.edit(editBuilder => {
     editBuilder.replace(editor.document.lineAt(line).range, sep);
     // Insert empty row below
@@ -539,7 +539,7 @@ async function insertEmptyRow(
   const origLine = editor.document.lineAt(endLine).text;
   const m = origLine.match(/^([ \t]*)/);
   const indent = m ? m[1] : '';
-  const emptyRow = indent + formatEmptyRow(colWidths);
+  const emptyRow = formatEmptyRow(colWidths, indent);
   const lastLine = editor.document.lineAt(endLine).range.end;
   await editor.edit(editBuilder => {
     editBuilder.insert(lastLine, '\n' + emptyRow);
@@ -627,8 +627,8 @@ function formatSeparatorLine(colWidths: number[]): string {
 }
 
 // Format empty row
-function formatEmptyRow(colWidths: number[]): string {
-  return '| ' + colWidths.map(w => ' '.repeat(w)).join(' | ') + ' |';
+function formatEmptyRow(colWidths: number[], indent: string = ''): string {
+  return indent + '| ' + colWidths.map(w => ' '.repeat(w)).join(' | ') + ' |';
 }
 
 // Format table row
