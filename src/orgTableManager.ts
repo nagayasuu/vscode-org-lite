@@ -5,120 +5,18 @@ export class OrgTableManager {
    * org-mode table formatting command
    */
   public static registerCommands(context: vscode.ExtensionContext): void {
-    // Register org-lite.tableMoveColumnLeft command
     const moveColLeftDisposable = vscode.commands.registerCommand(
       'org-lite.tableMoveColumnLeft',
       async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor || editor.document.languageId !== 'org') {
-          return;
-        }
-        const pos = editor.selection.active;
-        const lineText = editor.document.lineAt(pos.line).text;
-        if (!isTableLine(lineText)) return;
-        const { startLine, endLine } = detectTableRange(editor, pos.line);
-        const tableLines = getTableLines(editor, startLine, endLine);
-        const rows = splitTableRows(tableLines);
-        // Determine the current cell index
-        const cellMatches = [...lineText.matchAll(/\|/g)];
-        let cellIdx = 0;
-        for (let i = 0; i < cellMatches.length - 1; i++) {
-          const start = cellMatches[i].index ?? 0;
-          const end = cellMatches[i + 1].index ?? 0;
-          if (pos.character >= start && pos.character < end) {
-            cellIdx = i;
-            break;
-          }
-        }
-        if (cellIdx <= 0) return; // Can't move further left
-        // Move the column left for all rows
-        for (let r = 0; r < rows.length; r++) {
-          const row = rows[r];
-          if (row.length > cellIdx) {
-            // Swap cellIdx-1 and cellIdx
-            [row[cellIdx - 1], row[cellIdx]] = [row[cellIdx], row[cellIdx - 1]];
-          }
-        }
-        // Reformat and replace table
-        const colWidths = calcColWidths(rows);
-        await formatTable(editor, startLine, endLine, rows, colWidths);
-        // Move cursor to the same row, left column
-        const newLine = pos.line;
-        // Find new offset for the moved cell
-        const newRowText = editor.document.lineAt(newLine).text;
-        const newCellMatches = [...newRowText.matchAll(/\|/g)];
-        let offset = 0;
-        if (cellIdx - 1 < newCellMatches.length - 1) {
-          offset = newCellMatches[cellIdx - 1].index ?? 0;
-          offset++;
-          if (newRowText[offset] === ' ') offset++;
-        } else {
-          offset = newRowText.indexOf('| ') + 2;
-        }
-        const newPos = new vscode.Position(newLine, offset);
-        editor.selection = new vscode.Selection(newPos, newPos);
+        await moveTableColumn(-1);
       }
     );
     context.subscriptions.push(moveColLeftDisposable);
 
-    // Register org-lite.tableMoveColumnRight command
     const moveColRightDisposable = vscode.commands.registerCommand(
       'org-lite.tableMoveColumnRight',
       async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor || editor.document.languageId !== 'org') {
-          return;
-        }
-        const pos = editor.selection.active;
-        const lineText = editor.document.lineAt(pos.line).text;
-        if (!isTableLine(lineText)) return;
-        const { startLine, endLine } = detectTableRange(editor, pos.line);
-        const tableLines = getTableLines(editor, startLine, endLine);
-        const rows = splitTableRows(tableLines);
-        // Determine the current cell index
-        const cellMatches = [...lineText.matchAll(/\|/g)];
-        let cellIdx = 0;
-        for (let i = 0; i < cellMatches.length - 1; i++) {
-          const start = cellMatches[i].index ?? 0;
-          const end = cellMatches[i + 1].index ?? 0;
-          if (pos.character >= start && pos.character < end) {
-            cellIdx = i;
-            break;
-          }
-        }
-        // Move the column right for all rows
-        // Only if not the last column
-        const maxCols = Math.max(...rows.map(r => r.length));
-        if (cellIdx >= maxCols - 1) return; // Can't move further right
-        for (let r = 0; r < rows.length; r++) {
-          const row = rows[r];
-          if (row.length > cellIdx) {
-            // Swap cellIdx and cellIdx+1
-            if (row.length > cellIdx + 1) {
-              const tmp = row[cellIdx];
-              row[cellIdx] = row[cellIdx + 1];
-              row[cellIdx + 1] = tmp;
-            }
-          }
-        }
-        // Reformat and replace table
-        const colWidths = calcColWidths(rows);
-        await formatTable(editor, startLine, endLine, rows, colWidths);
-        // Move cursor to the same row, right column
-        const newLine = pos.line;
-        // Find new offset for the moved cell
-        const newRowText = editor.document.lineAt(newLine).text;
-        const newCellMatches = [...newRowText.matchAll(/\|/g)];
-        let offset = 0;
-        if (cellIdx + 1 < newCellMatches.length - 1) {
-          offset = newCellMatches[cellIdx + 1].index ?? 0;
-          offset++;
-          if (newRowText[offset] === ' ') offset++;
-        } else {
-          offset = newRowText.indexOf('| ') + 2;
-        }
-        const newPos = new vscode.Position(newLine, offset);
-        editor.selection = new vscode.Selection(newPos, newPos);
+        await moveTableColumn(1);
       }
     );
     context.subscriptions.push(moveColRightDisposable);
@@ -319,6 +217,75 @@ export class OrgTableManager {
       vscode.window.onDidChangeActiveTextEditor(updateOrgTableLineFocus)
     );
   }
+}
+
+// direction: -1 (left), +1 (right)
+async function moveTableColumn(direction: number) {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || editor.document.languageId !== 'org') {
+    return;
+  }
+  const pos = editor.selection.active;
+  const lineText = editor.document.lineAt(pos.line).text;
+  if (!isTableLine(lineText)) return;
+  const { startLine, endLine } = detectTableRange(editor, pos.line);
+  const tableLines = getTableLines(editor, startLine, endLine);
+  const rows = splitTableRows(tableLines);
+  // Determine the current cell index
+  const cellMatches = [...lineText.matchAll(/\|/g)];
+  let cellIdx = 0;
+  for (let i = 0; i < cellMatches.length - 1; i++) {
+    const start = cellMatches[i].index ?? 0;
+    const end = cellMatches[i + 1].index ?? 0;
+    if (pos.character >= start && pos.character < end) {
+      cellIdx = i;
+      break;
+    }
+  }
+  // Get the maximum number of columns and pad all rows
+  const maxCols = Math.max(
+    ...rows
+      .filter(r => !(r.length === 1 && r[0] === '__SEPARATOR__'))
+      .map(r => r.length)
+  );
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r];
+    if (row.length === 1 && row[0] === '__SEPARATOR__') continue;
+    while (row.length < maxCols) row.push('');
+  }
+  // Check for left/right edge
+  if (direction === -1 && cellIdx <= 0) return;
+  if (direction === 1 && cellIdx >= maxCols - 1) return;
+  // Swap columns
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r];
+    if (row.length === 1 && row[0] === '__SEPARATOR__') continue;
+    const from = cellIdx;
+    const to = cellIdx + direction;
+    if (to >= 0 && to < row.length) {
+      const tmp = row[from];
+      row[from] = row[to];
+      row[to] = tmp;
+    }
+  }
+  // Reformat
+  const colWidths = calcColWidths(rows);
+  await formatTable(editor, startLine, endLine, rows, colWidths);
+  // Move the cursor
+  const newLine = pos.line;
+  const newRowText = editor.document.lineAt(newLine).text;
+  const newCellMatches = [...newRowText.matchAll(/\|/g)];
+  let offset = 0;
+  const newCellIdx = cellIdx + direction;
+  if (newCellIdx >= 0 && newCellIdx < newCellMatches.length - 1) {
+    offset = newCellMatches[newCellIdx].index ?? 0;
+    offset++;
+    if (newRowText[offset] === ' ') offset++;
+  } else {
+    offset = newRowText.indexOf('| ') + 2;
+  }
+  const newPos = new vscode.Position(newLine, offset);
+  editor.selection = new vscode.Selection(newPos, newPos);
 }
 
 // Insert a new column at the end of the table
