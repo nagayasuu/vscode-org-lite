@@ -673,7 +673,29 @@ function updateOrgTableLineFocus() {
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
   const isTable = isTableLine(lineText);
-  vscode.commands.executeCommand('setContext', 'orgTableLineFocus', isTable);
+  let isTableLineFocus = isTable;
+  // If the next or previous line is also a table line, set to false
+  if (isTable) {
+    // Check next line
+    if (pos.line + 1 < editor.document.lineCount) {
+      const nextLineText = editor.document.lineAt(pos.line + 1).text;
+      if (isTableLine(nextLineText)) {
+        isTableLineFocus = false;
+      }
+    }
+    // Check previous line
+    if (pos.line - 1 >= 0) {
+      const prevLineText = editor.document.lineAt(pos.line - 1).text;
+      if (isTableLine(prevLineText)) {
+        isTableLineFocus = false;
+      }
+    }
+  }
+  vscode.commands.executeCommand(
+    'setContext',
+    'orgTableLineFocus',
+    isTableLineFocus
+  );
 }
 
 // orgTableCellFocus context key management function (declared outside the class)
