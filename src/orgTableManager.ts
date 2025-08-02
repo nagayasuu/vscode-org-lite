@@ -8,6 +8,45 @@ export class OrgTableManager {
    * org-mode table formatting command
    */
   public static registerCommands(context: vscode.ExtensionContext): void {
+    // Register org-lite.formatOrgTable command
+    const formatOrgTableDisposable = vscode.commands.registerCommand(
+      'org-lite.formatOrgTable',
+      async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor || editor.document.languageId !== 'org') {
+          return;
+        }
+        const pos = editor.selection.active;
+        const lineText = editor.document.lineAt(pos.line).text;
+        if (!isTableLine(lineText)) return;
+        const { startLine, endLine } = detectTableRange(editor, pos.line);
+        const tableLines = getTableLines(editor, startLine, endLine);
+        const rows = splitTableRows(tableLines);
+        const colWidths = calcColWidths(rows);
+        await formatTable(editor, startLine, endLine, rows, colWidths);
+
+        // Add an empty row to the next line and move the cursor to the first cell
+        const indent = getIndent(editor.document.lineAt(endLine).text);
+        const emptyRow = formatEmptyRow(colWidths, indent);
+        const lastLine = editor.document.lineAt(endLine).range.end;
+        await editor.edit(editBuilder => {
+          editBuilder.insert(lastLine, '\n' + emptyRow);
+        });
+        // Move the cursor to the first cell of the added row
+        const firstCellIdx = emptyRow.indexOf('| ') + 2;
+        const newPos = new vscode.Position(endLine + 1, firstCellIdx);
+        editor.selection = new vscode.Selection(newPos, newPos);
+      }
+    );
+    context.subscriptions.push(formatOrgTableDisposable);
+    // Update context key when cursor moves or editor changes
+    context.subscriptions.push(
+      vscode.window.onDidChangeTextEditorSelection(updateOrgTableLineFocus)
+    );
+    context.subscriptions.push(
+      vscode.window.onDidChangeActiveTextEditor(updateOrgTableLineFocus)
+    );
+
     const moveColLeftDisposable = vscode.commands.registerCommand(
       'org-lite.tableMoveColumnLeft',
       async () => {
@@ -608,6 +647,35 @@ function formatTableRow(row: string[], colWidths: number[]): string {
   );
 }
 
+// New utility function: getCellOffsetInRow
+function getCellOffsetInRow(rowText: string, cellIdx: number): number {
+  const cellMatches = [...rowText.matchAll(/\|/g)];
+  if (cellIdx < cellMatches.length - 1) {
+    let offset = (cellMatches[cellIdx].index ?? 0) + 1;
+    if (rowText[offset] === ' ') offset++;
+    return offset;
+  } else {
+    // fallback: first cell or after last bar
+    const idx = rowText.indexOf('| ');
+    return idx !== -1
+      ? idx + 2
+      : (cellMatches[cellMatches.length - 1]?.index ?? 0) + 1;
+  }
+}
+
+// orgTableLineFocus context key management function
+function updateOrgTableLineFocus() {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor || editor.document.languageId !== 'org') {
+    vscode.commands.executeCommand('setContext', 'orgTableLineFocus', false);
+    return;
+  }
+  const pos = editor.selection.active;
+  const lineText = editor.document.lineAt(pos.line).text;
+  const isTable = isTableLine(lineText);
+  vscode.commands.executeCommand('setContext', 'orgTableLineFocus', isTable);
+}
+
 // orgTableCellFocus context key management function (declared outside the class)
 function updateOrgTableCellFocus() {
   const editor = vscode.window.activeTextEditor;
@@ -633,20 +701,4 @@ function updateOrgTableCellFocus() {
     }
   }
   vscode.commands.executeCommand('setContext', 'orgTableCellFocus', focus);
-}
-
-// New utility function: getCellOffsetInRow
-function getCellOffsetInRow(rowText: string, cellIdx: number): number {
-  const cellMatches = [...rowText.matchAll(/\|/g)];
-  if (cellIdx < cellMatches.length - 1) {
-    let offset = (cellMatches[cellIdx].index ?? 0) + 1;
-    if (rowText[offset] === ' ') offset++;
-    return offset;
-  } else {
-    // fallback: first cell or after last bar
-    const idx = rowText.indexOf('| ');
-    return idx !== -1
-      ? idx + 2
-      : (cellMatches[cellMatches.length - 1]?.index ?? 0) + 1;
-  }
 }
