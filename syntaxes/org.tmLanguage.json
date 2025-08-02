@@ -2,7 +2,11 @@
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Org",
   "scopeName": "source.org",
-  "patterns": [{ "include": "#heading" }, { "include": "#bold" }],
+  "patterns": [
+    { "include": "#heading" },
+    { "include": "#bold" },
+    { "include": "#link" }
+  ],
   "repository": {
     "heading": {
       "patterns": [
@@ -67,6 +71,14 @@
         {
           "name": "markup.bold",
           "match": "\\*(.*?)\\*"
+        }
+      ]
+    },
+    "link": {
+      "patterns": [
+        {
+          "name": "markup.underline.link.org",
+          "match": "\\[\\[[^\\]]+\\]\\]"
         }
       ]
     }
