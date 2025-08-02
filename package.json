@@ -52,6 +52,10 @@
       {
         "command": "org-lite.tableShiftTabAction",
         "title": "Move to Previous Org Table Cell"
+      },
+      {
+        "command": "org-lite.tableEnterAction",
+        "title": "Org Table Enter Action"
       }
     ],
     "keybindings": [
@@ -73,6 +77,11 @@
       {
         "command": "org-lite.tableShiftTabAction",
         "key": "shift+tab",
+        "when": "editorTextFocus && editorLangId == org && orgTableLineFocus"
+      },
+      {
+        "command": "org-lite.tableEnterAction",
+        "key": "enter",
         "when": "editorTextFocus && editorLangId == org && orgTableLineFocus"
       }
     ]

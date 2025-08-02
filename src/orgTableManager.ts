@@ -5,6 +5,87 @@ export class OrgTableManager {
    * org-mode table formatting command
    */
   public static registerCommands(context: vscode.ExtensionContext): void {
+    // Register org-lite.tableEnterAction command
+    const enterDisposable = vscode.commands.registerCommand(
+      'org-lite.tableEnterAction',
+      async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor || editor.document.languageId !== 'org') {
+          return;
+        }
+        const pos = editor.selection.active;
+        const lineText = editor.document.lineAt(pos.line).text;
+        const tableLine = isTableLine(lineText);
+        if (!tableLine) return;
+        const { startLine, endLine } = detectTableRange(editor, pos.line);
+        // Header row detection: is the first row of the table
+        const isHeader = pos.line === startLine;
+        if (isHeader) {
+          // Add a new column (refactored to insertColumn)
+          await insertColumn(editor, startLine, endLine, pos.line);
+        } else {
+          // Move vertically to the cell below, or add a new row if at the last row
+          if (pos.line === endLine) {
+            // Add a new empty row and move the cursor to the beginning of the same column
+            const tableLines = getTableLines(editor, startLine, endLine);
+            const rows = splitTableRows(tableLines);
+            const colWidths = calcColWidths(rows);
+            const emptyRow = formatEmptyRow(colWidths);
+            await editor.edit(editBuilder => {
+              const lastLine = editor.document.lineAt(endLine).range.end;
+              editBuilder.insert(lastLine, '\n' + emptyRow);
+            });
+            // Calculate the current cell position
+            const cellMatches = [...lineText.matchAll(/\|/g)];
+            let cellIdx = 0;
+            for (let i = 0; i < cellMatches.length - 1; i++) {
+              const start = cellMatches[i].index ?? 0;
+              const end = cellMatches[i + 1].index ?? 0;
+              if (pos.character >= start && pos.character < end) {
+                cellIdx = i;
+                break;
+              }
+            }
+            // Move the cursor to the beginning of the same cell in the new row
+            const newRowText = emptyRow;
+            const newCellMatches = [...newRowText.matchAll(/\|/g)];
+            let offset = 0;
+            if (cellIdx < newCellMatches.length - 1) {
+              offset = newCellMatches[cellIdx].index ?? 0;
+              offset++;
+              if (newRowText[offset] === ' ') offset++;
+            } else {
+              // fallback: first column
+              offset = newRowText.indexOf('| ') + 2;
+            }
+            const newPos = new vscode.Position(pos.line + 1, offset);
+            editor.selection = new vscode.Selection(newPos, newPos);
+          } else if (pos.line + 1 <= endLine) {
+            const nextRowText = editor.document.lineAt(pos.line + 1).text;
+            const cellMatches = [...lineText.matchAll(/\|/g)];
+            let cellIdx = 0;
+            for (let i = 0; i < cellMatches.length - 1; i++) {
+              const start = cellMatches[i].index ?? 0;
+              const end = cellMatches[i + 1].index ?? 0;
+              if (pos.character >= start && pos.character < end) {
+                cellIdx = i;
+                break;
+              }
+            }
+            const nextCellMatches = [...nextRowText.matchAll(/\|/g)];
+            if (cellIdx < nextCellMatches.length - 1) {
+              let offset = nextCellMatches[cellIdx].index ?? 0;
+              offset++;
+              if (nextRowText[offset] === ' ') offset++;
+              const newPos = new vscode.Position(pos.line + 1, offset);
+              editor.selection = new vscode.Selection(newPos, newPos);
+            }
+          }
+        }
+      }
+    );
+    context.subscriptions.push(enterDisposable);
+
     // Register org-lite.tableShiftTabAction command
     const shiftTabDisposable = vscode.commands.registerCommand(
       'org-lite.tableShiftTabAction',
@@ -118,6 +199,38 @@ export class OrgTableManager {
   }
 }
 
+// Insert a new column at the end of the table
+async function insertColumn(
+  editor: vscode.TextEditor,
+  startLine: number,
+  endLine: number,
+  cursorLine: number
+) {
+  await editor.edit(editBuilder => {
+    for (let i = startLine; i <= endLine; i++) {
+      const rowText = editor.document.lineAt(i).text;
+      if (isSeparatorLine(rowText)) {
+        // Insert "+--" before the last "|" at the end
+        const lastBar = rowText.lastIndexOf('|');
+        const newSep =
+          rowText.slice(0, lastBar) + '+--' + rowText.slice(lastBar);
+        editBuilder.replace(editor.document.lineAt(i).range, newSep);
+      } else {
+        // Insert " | " just before the last "|"
+        const lastBar = rowText.lastIndexOf('|');
+        const newRow =
+          rowText.slice(0, lastBar) + '|  ' + rowText.slice(lastBar);
+        editBuilder.replace(editor.document.lineAt(i).range, newRow);
+      }
+    }
+  });
+  // Move the cursor to the beginning of the new column
+  const lineText = editor.document.lineAt(cursorLine).text;
+  // Just before the last '|'
+  const newPos = new vscode.Position(cursorLine, lineText.length - 2);
+  editor.selection = new vscode.Selection(newPos, newPos);
+}
+
 // Function to return the position to move to the previous cell or previous row's last cell with Shift+Tab
 function getPrevCellPosition(
   editor: vscode.TextEditor,
@@ -220,9 +333,13 @@ function getNextCellPosition(
 
 // Calculate column widths
 function calcColWidths(rows: string[][]): number[] {
-  const colCount = Math.max(...rows.map(r => r.length));
+  // Exclude separator rows (['__SEPARATOR__']) from width calculation
+  const dataRows = rows.filter(
+    row => !(row.length === 1 && row[0] === '__SEPARATOR__')
+  );
+  const colCount = Math.max(...dataRows.map(r => r.length), 0);
   const colWidths = Array(colCount).fill(0);
-  for (const row of rows) {
+  for (const row of dataRows) {
     for (let c = 0; c < colCount; c++) {
       colWidths[c] = Math.max(colWidths[c], getDisplayWidth(row[c] || ''));
     }
