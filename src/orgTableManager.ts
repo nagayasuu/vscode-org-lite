@@ -48,8 +48,7 @@ export class OrgTableManager {
           // Move vertically to the cell below, or add a new row if at the last row
           if (pos.line === endLine) {
             // Add a new empty row and move the cursor to the beginning of the same column
-            const m = lineText.match(/^([ \t]*)/);
-            const indent = m ? m[1] : '';
+            const indent = getIndent(lineText);
             const emptyRow = formatEmptyRow(colWidths, indent);
             await editor.edit(editBuilder => {
               const lastLine = editor.document.lineAt(endLine).range.end;
@@ -203,8 +202,7 @@ export class OrgTableManager {
           await insertEmptyRow(editor, endLine, colWidths);
           // Move the cursor precisely to just after the "| " of the newly added empty row (the beginning of the first cell, considering indentation)
           const origLine = editor.document.lineAt(pos.line).text;
-          const m = origLine.match(/^([ \t]*)/);
-          const indent = m ? m[1] : '';
+          const indent = getIndent(origLine);
           const nextLine = formatEmptyRow(colWidths, indent);
           let idx = nextLine.indexOf('| ') + 2;
           const newPos = new vscode.Position(pos.line + 1, idx);
@@ -221,6 +219,12 @@ export class OrgTableManager {
       vscode.window.onDidChangeActiveTextEditor(updateOrgTableCellFocus)
     );
   }
+}
+
+// Indentation utility
+function getIndent(text: string): string {
+  const m = text.match(/^([ \t]*)/);
+  return m ? m[1] : '';
 }
 
 // direction: -1 (left), +1 (right)
@@ -482,8 +486,7 @@ async function insertSeparatorLine(
   colWidths = getLatestColWidths(editor, line);
   // Get the original indentation
   const origLine = editor.document.lineAt(line).text;
-  const m = origLine.match(/^([ \t]*)/);
-  const indent = m ? m[1] : '';
+  const indent = getIndent(origLine);
   const sep = indent + formatSeparatorLine(colWidths);
   const emptyRow = formatEmptyRow(colWidths, indent);
   await editor.edit(editBuilder => {
@@ -537,8 +540,7 @@ async function insertEmptyRow(
 ) {
   // Get the indentation of the previous line
   const origLine = editor.document.lineAt(endLine).text;
-  const m = origLine.match(/^([ \t]*)/);
-  const indent = m ? m[1] : '';
+  const indent = getIndent(origLine);
   const emptyRow = formatEmptyRow(colWidths, indent);
   const lastLine = editor.document.lineAt(endLine).range.end;
   await editor.edit(editBuilder => {
