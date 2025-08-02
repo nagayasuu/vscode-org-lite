@@ -1,71 +1,44 @@
-# org-lite README
+# Org Lite
 
-This is the README for your extension "org-lite". After writing up a brief description, we recommend including the following sections.
+Org Lite brings the core experience of [Org mode](https://orgmode.org/) to Visual Studio Code in a simple, fast, and user-friendly way.
+It focuses on intuitive table editing, clickable links, TODO management, and a clean outline view—making your plain text organization productive and enjoyable.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Org Table Editing**
+  - `Tab`, `Shift+Tab`, and `Enter` for intuitive cell navigation
+  - Automatic table formatting and alignment, including support for full-width (ambiguous-width) characters
+  - Add, remove, and move columns left/right with keyboard shortcuts
+  - Indentation-aware editing for nested tables
 
-For example if there is an image subfolder under your extension project workspace:
+- **Hyperlink Support**
+  - `[[LINK]]` style links are highlighted and clickable
+  - Ctrl+Click (Cmd+Click) to open local files or URLs in the browser
+  - Path suggestion (completion) when editing inside `[[...` (experimental)
 
-\!\[feature X\]\(images/feature-x.png\)
+- **TODO State Rotation & Task List**
+  - Quickly cycle `TODO` states with `Alt+Right/Left`
+  - Simple task list management
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- **Outline Support**
+  - Org headings are recognized and shown in a [cleaner outline view](https://orgmode.org/org.html#Clean-View)
+
+- **Text Markup**
+  - Bold text markup supported
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-- `myExtension.enable`: Enable/disable this extension.
-- `myExtension.thing`: Set to `blah` to do something.
+No special requirements. Just install the extension and start editing `.org` files in VS Code (version 1.102.0 or later).
+All features work out of the box—no additional setup needed.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- Some advanced Org mode features (e.g. clocking, agenda, advanced markup) are not supported
+- Path completion in links is experimental and may not work in all cases
 
-## Release Notes
+## References
 
-Users appreciate release notes as you update your extension.
+This extension was inspired by and references the following projects:
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-- [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-- Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-- Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-- Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-- [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-- [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- [vscode-org-mode](https://github.com/vscode-org-mode/vscode-org-mode)
+- [vscode-text-tables](https://github.com/rpeshkov/vscode-text-tables)
