@@ -58,15 +58,7 @@ export class OrgTableManager {
             const cellIdx = getCellIndexAtPosition(lineText, pos.character);
             // Move the cursor to the beginning of the same cell in the new row (consider indentation)
             const newRowText = emptyRow;
-            const newCellMatches = [...newRowText.matchAll(/\|/g)];
-            let offset = 0;
-            if (cellIdx < newCellMatches.length - 1) {
-              offset = (newCellMatches[cellIdx].index ?? 0) + 1;
-              if (newRowText[offset] === ' ') offset++;
-            } else {
-              // fallback: first column
-              offset = newRowText.indexOf('| ') + 2;
-            }
+            const offset = getCellOffsetInRow(newRowText, cellIdx);
             const newPos = new vscode.Position(pos.line + 1, offset);
             editor.selection = new vscode.Selection(newPos, newPos);
           } else if (pos.line + 1 <= endLine) {
@@ -74,9 +66,7 @@ export class OrgTableManager {
             const cellIdx = getCellIndexAtPosition(lineText, pos.character);
             const nextCellMatches = [...nextRowText.matchAll(/\|/g)];
             if (cellIdx < nextCellMatches.length - 1) {
-              let offset = nextCellMatches[cellIdx].index ?? 0;
-              offset++;
-              if (nextRowText[offset] === ' ') offset++;
+              const offset = getCellOffsetInRow(nextRowText, cellIdx);
               const newPos = new vscode.Position(pos.line + 1, offset);
               editor.selection = new vscode.Selection(newPos, newPos);
             }
@@ -271,15 +261,8 @@ async function moveTableColumn(direction: number) {
   const newLine = pos.line;
   const newRowText = editor.document.lineAt(newLine).text;
   const newCellMatches = [...newRowText.matchAll(/\|/g)];
-  let offset = 0;
   const newCellIdx = cellIdx + direction;
-  if (newCellIdx >= 0 && newCellIdx < newCellMatches.length - 1) {
-    offset = newCellMatches[newCellIdx].index ?? 0;
-    offset++;
-    if (newRowText[offset] === ' ') offset++;
-  } else {
-    offset = newRowText.indexOf('| ') + 2;
-  }
+  const offset = getCellOffsetInRow(newRowText, newCellIdx);
   const newPos = new vscode.Position(newLine, offset);
   editor.selection = new vscode.Selection(newPos, newPos);
 }
@@ -648,4 +631,20 @@ function updateOrgTableCellFocus() {
     }
   }
   vscode.commands.executeCommand('setContext', 'orgTableCellFocus', focus);
+}
+
+// New utility function: getCellOffsetInRow
+function getCellOffsetInRow(rowText: string, cellIdx: number): number {
+  const cellMatches = [...rowText.matchAll(/\|/g)];
+  if (cellIdx < cellMatches.length - 1) {
+    let offset = (cellMatches[cellIdx].index ?? 0) + 1;
+    if (rowText[offset] === ' ') offset++;
+    return offset;
+  } else {
+    // fallback: first cell or after last bar
+    const idx = rowText.indexOf('| ');
+    return idx !== -1
+      ? idx + 2
+      : (cellMatches[cellMatches.length - 1]?.index ?? 0) + 1;
+  }
 }
