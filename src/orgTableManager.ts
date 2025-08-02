@@ -149,7 +149,6 @@ export class OrgTableManager {
 
           if (nextCellPos) {
             let nextLine = nextCellPos.line;
-            let nextChar = nextCellPos.character;
             // If the destination is a separator line, move to the first cell of the next line
             if (
               nextLine < editor.document.lineCount &&
