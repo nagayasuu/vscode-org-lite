@@ -56,6 +56,14 @@
       {
         "command": "org-lite.tableEnterAction",
         "title": "Org Table Enter Action"
+      },
+      {
+        "command": "org-lite.tableMoveColumnLeft",
+        "title": "Move Org Table Column Left"
+      },
+      {
+        "command": "org-lite.tableMoveColumnRight",
+        "title": "Move Org Table Column Right"
       }
     ],
     "keybindings": [
@@ -82,6 +90,16 @@
       {
         "command": "org-lite.tableEnterAction",
         "key": "enter",
+        "when": "editorTextFocus && editorLangId == org && orgTableLineFocus"
+      },
+      {
+        "command": "org-lite.tableMoveColumnLeft",
+        "key": "ctrl+alt+left",
+        "when": "editorTextFocus && editorLangId == org && orgTableLineFocus"
+      },
+      {
+        "command": "org-lite.tableMoveColumnRight",
+        "key": "ctrl+alt+right",
         "when": "editorTextFocus && editorLangId == org && orgTableLineFocus"
       }
     ]
