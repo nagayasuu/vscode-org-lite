@@ -2,7 +2,9 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { showAgendaView } from './orgAgendaView';
+import { OrgDocumentLinkProvider } from './orgDocumentLinkProvider';
 import { OrgDocumentSymbolProvider } from './orgDocumentSymbolProvider';
+import { OrgPathCompletionProvider } from './orgPathCompletionProvider';
 import { OrgTableManager } from './orgTableManager';
 import { OrgTaskManager } from './orgTaskManager';
 
@@ -28,7 +30,20 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Push all disposables at once for clarity
-  context.subscriptions.push(documentSymbolProvider, showAgendaCommand);
+  context.subscriptions.push(
+    documentSymbolProvider,
+    showAgendaCommand,
+    vscode.languages.registerDocumentLinkProvider(
+      { language: 'org' },
+      new OrgDocumentLinkProvider()
+    ),
+    vscode.languages.registerCompletionItemProvider(
+      'org',
+      new OrgPathCompletionProvider(),
+      '[',
+      '/'
+    )
+  );
 }
 
 // This method is called when your extension is deactivated
