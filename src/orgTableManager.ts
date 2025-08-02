@@ -64,18 +64,20 @@ export class OrgTableManager {
                 break;
               }
             }
-            // Move the cursor to the beginning of the same cell in the new row
+            // Move the cursor to the beginning of the same cell in the new row (consider indentation)
             const newRowText = emptyRow;
+            const m = lineText.match(/^([ \t]*)/);
+            const indentLen = m ? m[1].length : 0;
             const newCellMatches = [...newRowText.matchAll(/\|/g)];
             let offset = 0;
             if (cellIdx < newCellMatches.length - 1) {
-              offset = newCellMatches[cellIdx].index ?? 0;
-              offset++;
+              offset = (newCellMatches[cellIdx].index ?? 0) + 1;
               if (newRowText[offset] === ' ') offset++;
             } else {
               // fallback: first column
               offset = newRowText.indexOf('| ') + 2;
             }
+            offset += indentLen;
             const newPos = new vscode.Position(pos.line + 1, offset);
             editor.selection = new vscode.Selection(newPos, newPos);
           } else if (pos.line + 1 <= endLine) {
@@ -200,9 +202,12 @@ export class OrgTableManager {
           }
 
           await insertEmptyRow(editor, endLine, colWidths);
-          // Move the cursor precisely to just after the "| " of the newly added empty row (the beginning of the first cell)
+          // Move the cursor precisely to just after the "| " of the newly added empty row (the beginning of the first cell, considering indentation)
           const nextLine = formatEmptyRow(colWidths);
-          let idx = nextLine.indexOf('| ') + 2;
+          const origLine = editor.document.lineAt(pos.line).text;
+          const m = origLine.match(/^([ \t]*)/);
+          const indentLen = m ? m[1].length : 0;
+          let idx = nextLine.indexOf('| ') + 2 + indentLen;
           const newPos = new vscode.Position(pos.line + 1, idx);
           editor.selection = new vscode.Selection(newPos, newPos);
         }
