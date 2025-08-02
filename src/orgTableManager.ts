@@ -55,16 +55,7 @@ export class OrgTableManager {
               editBuilder.insert(lastLine, '\n' + emptyRow);
             });
             // Calculate the current cell position
-            const cellMatches = [...lineText.matchAll(/\|/g)];
-            let cellIdx = 0;
-            for (let i = 0; i < cellMatches.length - 1; i++) {
-              const start = cellMatches[i].index ?? 0;
-              const end = cellMatches[i + 1].index ?? 0;
-              if (pos.character >= start && pos.character < end) {
-                cellIdx = i;
-                break;
-              }
-            }
+            const cellIdx = getCellIndexAtPosition(lineText, pos.character);
             // Move the cursor to the beginning of the same cell in the new row (consider indentation)
             const newRowText = emptyRow;
             const newCellMatches = [...newRowText.matchAll(/\|/g)];
@@ -80,16 +71,7 @@ export class OrgTableManager {
             editor.selection = new vscode.Selection(newPos, newPos);
           } else if (pos.line + 1 <= endLine) {
             const nextRowText = editor.document.lineAt(pos.line + 1).text;
-            const cellMatches = [...lineText.matchAll(/\|/g)];
-            let cellIdx = 0;
-            for (let i = 0; i < cellMatches.length - 1; i++) {
-              const start = cellMatches[i].index ?? 0;
-              const end = cellMatches[i + 1].index ?? 0;
-              if (pos.character >= start && pos.character < end) {
-                cellIdx = i;
-                break;
-              }
-            }
+            const cellIdx = getCellIndexAtPosition(lineText, pos.character);
             const nextCellMatches = [...nextRowText.matchAll(/\|/g)];
             if (cellIdx < nextCellMatches.length - 1) {
               let offset = nextCellMatches[cellIdx].index ?? 0;
@@ -221,6 +203,21 @@ export class OrgTableManager {
   }
 }
 
+// Cell index utility
+function getCellIndexAtPosition(lineText: string, character: number): number {
+  const cellMatches = [...lineText.matchAll(/\|/g)];
+  let cellIdx = 0;
+  for (let i = 0; i < cellMatches.length - 1; i++) {
+    const start = cellMatches[i].index ?? 0;
+    const end = cellMatches[i + 1].index ?? 0;
+    if (character >= start && character < end) {
+      cellIdx = i;
+      break;
+    }
+  }
+  return cellIdx;
+}
+
 // Indentation utility
 function getIndent(text: string): string {
   const m = text.match(/^([ \t]*)/);
@@ -240,16 +237,7 @@ async function moveTableColumn(direction: number) {
   const tableLines = getTableLines(editor, startLine, endLine);
   const rows = splitTableRows(tableLines);
   // Determine the current cell index
-  const cellMatches = [...lineText.matchAll(/\|/g)];
-  let cellIdx = 0;
-  for (let i = 0; i < cellMatches.length - 1; i++) {
-    const start = cellMatches[i].index ?? 0;
-    const end = cellMatches[i + 1].index ?? 0;
-    if (pos.character >= start && pos.character < end) {
-      cellIdx = i;
-      break;
-    }
-  }
+  const cellIdx = getCellIndexAtPosition(lineText, pos.character);
   // Get the maximum number of columns and pad all rows
   const maxCols = Math.max(
     ...rows
@@ -336,16 +324,8 @@ function getPrevCellPosition(
   endLine: number
 ): vscode.Position | null {
   const currentRowText = editor.document.lineAt(pos.line).text;
+  const cellIdx = getCellIndexAtPosition(currentRowText, pos.character - 1);
   const cellMatches = [...currentRowText.matchAll(/\|/g)];
-  let cellIdx = 0;
-  for (let i = 0; i < cellMatches.length - 1; i++) {
-    const start = cellMatches[i].index ?? 0;
-    const end = cellMatches[i + 1].index ?? 0;
-    if (pos.character > start && pos.character <= end) {
-      cellIdx = i;
-      break;
-    }
-  }
   // If at the beginning of the line (first cell), move to the last cell of the previous row
   if (cellIdx === 0 && pos.line > startLine) {
     let prevLine = pos.line - 1;
@@ -386,16 +366,8 @@ function getNextCellPosition(
   endLine: number
 ): vscode.Position | null {
   const currentRowText = editor.document.lineAt(pos.line).text;
+  let cellIdx = getCellIndexAtPosition(currentRowText, pos.character);
   const cellMatches = [...currentRowText.matchAll(/\|/g)];
-  let cellIdx = 0;
-  for (let i = 0; i < cellMatches.length - 1; i++) {
-    const start = cellMatches[i].index ?? 0;
-    const end = cellMatches[i + 1].index ?? 0;
-    if (pos.character >= start && pos.character < end) {
-      cellIdx = i;
-      break;
-    }
-  }
   // If at the end of the line, always set cellIdx to the last cell section
   if (pos.character === currentRowText.length && cellMatches.length >= 2) {
     cellIdx = cellMatches.length - 2;
