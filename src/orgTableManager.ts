@@ -473,28 +473,22 @@ function getTableLines(
 
 // Split table rows into cells
 function splitTableRows(tableLines: string[]): string[][] {
-  // First, estimate the maximum number of columns
-  const cellCounts = tableLines
-    .filter(line => !isSeparatorLine(line))
-    .map(
-      line =>
-        line
-          .trim()
-          .split(/\s*\|\s*/)
-          .filter(cell => cell.length > 0).length
-    );
-  const maxCols = cellCounts.length > 0 ? Math.max(...cellCounts) : 0;
-
   return tableLines.map(line => {
     if (isSeparatorLine(line)) {
       // Separator lines are stored as arrays with a special flag
       return ['__SEPARATOR__'];
     }
-    return line
-      .trim()
-      .split(/\s*\|\s*/)
-      .filter(cell => cell.length > 0);
+    // Treat empty cells as empty elements, but exclude leading/trailing empty elements
+    return splitTableLineToCells(line);
   });
+}
+
+// Helper: Split a table line into cells, excluding leading/trailing empty elements
+function splitTableLineToCells(line: string): string[] {
+  let cells = line.trim().split(/\s*\|\s*/);
+  if (cells.length > 0 && cells[0] === '') cells.shift();
+  if (cells.length > 0 && cells[cells.length - 1] === '') cells.pop();
+  return cells;
 }
 
 // Display width calculation function (full-width: 2, half-width: 1)
