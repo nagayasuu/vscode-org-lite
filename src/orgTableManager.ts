@@ -173,13 +173,8 @@ export class OrgTableManager {
             return;
           }
 
-          await formatAndInsertTable(
-            editor,
-            startLine,
-            endLine,
-            rows,
-            colWidths
-          );
+          await formatTable(editor, startLine, endLine, rows, colWidths);
+          await insertEmptyRow(editor, endLine, colWidths);
           // Move the cursor precisely to just after the "| " of the newly added empty row (the beginning of the first cell)
           const nextLine = formatEmptyRow(colWidths);
           let idx = nextLine.indexOf('| ') + 2;
@@ -401,8 +396,8 @@ async function formatAndInsertSeparator(
   editor.selection = new vscode.Selection(newPos, newPos);
 }
 
-// Format and insert table rows and empty row
-async function formatAndInsertTable(
+// Format and replace table rows (without adding a new row)
+async function formatTable(
   editor: vscode.TextEditor,
   startLine: number,
   endLine: number,
@@ -418,7 +413,6 @@ async function formatAndInsertTable(
     }
     return formatTableRow(row, colWidths);
   });
-  formatted.push(formatEmptyRow(colWidths));
   await editor.edit(editBuilder => {
     for (let i = startLine; i <= endLine; i++) {
       editBuilder.replace(
@@ -426,9 +420,19 @@ async function formatAndInsertTable(
         formatted[i - startLine]
       );
     }
-    // Insert an empty row below the last line
-    const lastLine = editor.document.lineAt(endLine).range.end;
-    editBuilder.insert(lastLine, '\n' + formatted[formatted.length - 1]);
+  });
+}
+
+// Insert an empty row below the table
+async function insertEmptyRow(
+  editor: vscode.TextEditor,
+  endLine: number,
+  colWidths: number[]
+) {
+  const emptyRow = formatEmptyRow(colWidths);
+  const lastLine = editor.document.lineAt(endLine).range.end;
+  await editor.edit(editBuilder => {
+    editBuilder.insert(lastLine, '\n' + emptyRow);
   });
 }
 // Table line detection function (any string starting with '|')
