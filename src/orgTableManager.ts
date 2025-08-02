@@ -211,10 +211,10 @@ export class OrgTableManager {
     context.subscriptions.push(formatTableDisposable);
     // Update context key when cursor moves or editor changes
     context.subscriptions.push(
-      vscode.window.onDidChangeTextEditorSelection(updateOrgTableLineFocus)
+      vscode.window.onDidChangeTextEditorSelection(updateOrgTableCellFocus)
     );
     context.subscriptions.push(
-      vscode.window.onDidChangeActiveTextEditor(updateOrgTableLineFocus)
+      vscode.window.onDidChangeActiveTextEditor(updateOrgTableCellFocus)
     );
   }
 }
@@ -475,10 +475,13 @@ async function insertSeparatorLine(
   line: number,
   colWidths: number[]
 ) {
-  // Get the latest column widths of the current table range
   colWidths = getLatestColWidths(editor, line);
-  const sep = formatSeparatorLine(colWidths);
-  const emptyRow = formatEmptyRow(colWidths);
+  // Get the original indentation
+  const origLine = editor.document.lineAt(line).text;
+  const m = origLine.match(/^([ \t]*)/);
+  const indent = m ? m[1] : '';
+  const sep = indent + formatSeparatorLine(colWidths);
+  const emptyRow = indent + formatEmptyRow(colWidths);
   await editor.edit(editBuilder => {
     editBuilder.replace(editor.document.lineAt(line).range, sep);
     // Insert empty row below
@@ -486,7 +489,7 @@ async function insertSeparatorLine(
     editBuilder.insert(sepEnd, '\n' + emptyRow);
   });
   // Move cursor to just after "| " of the new empty row
-  const newPos = new vscode.Position(line + 1, 2);
+  const newPos = new vscode.Position(line + 1, (indent.length || 0) + 2);
   editor.selection = new vscode.Selection(newPos, newPos);
 }
 
@@ -498,12 +501,19 @@ async function formatTable(
   rows: string[][],
   colWidths: number[]
 ) {
-  const formatted = rows.map(row => {
-    // Separator lines are regenerated with formatSeparatorLine
+  // Get the indentation of each line
+  const indents: string[] = [];
+  for (let i = startLine; i <= endLine; i++) {
+    const line = editor.document.lineAt(i).text;
+    const m = line.match(/^([ \t]*)/);
+    indents.push(m ? m[1] : '');
+  }
+  const formatted = rows.map((row, idx) => {
+    const indent = indents[idx] || '';
     if (row.length === 1 && row[0] === '__SEPARATOR__') {
-      return formatSeparatorLine(colWidths);
+      return indent + formatSeparatorLine(colWidths);
     }
-    return formatTableRow(row, colWidths);
+    return indent + formatTableRow(row, colWidths);
   });
   await editor.edit(editBuilder => {
     for (let i = startLine; i <= endLine; i++) {
@@ -521,7 +531,11 @@ async function insertEmptyRow(
   endLine: number,
   colWidths: number[]
 ) {
-  const emptyRow = formatEmptyRow(colWidths);
+  // Get the indentation of the previous line
+  const origLine = editor.document.lineAt(endLine).text;
+  const m = origLine.match(/^([ \t]*)/);
+  const indent = m ? m[1] : '';
+  const emptyRow = indent + formatEmptyRow(colWidths);
   const lastLine = editor.document.lineAt(endLine).range.end;
   await editor.edit(editBuilder => {
     editBuilder.insert(lastLine, '\n' + emptyRow);
@@ -530,7 +544,8 @@ async function insertEmptyRow(
 
 // Table line detection function (any string starting with '|')
 function isTableLine(text: string): boolean {
-  return /^\|.*/.test(text);
+  // Allow leading indentation (spaces or tabs), and consider a line as a table line if it starts with a '|'
+  return /^[ \t]*\|.*/.test(text);
 }
 
 // Detect table range (startLine, endLine)
@@ -627,16 +642,29 @@ function formatTableRow(row: string[], colWidths: number[]): string {
   );
 }
 
-// orgTableLineFocus context key management function (declared outside the class)
-function updateOrgTableLineFocus() {
+// orgTableCellFocus context key management function (declared outside the class)
+function updateOrgTableCellFocus() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
-    vscode.commands.executeCommand('setContext', 'orgTableLineFocus', false);
+    vscode.commands.executeCommand('setContext', 'orgTableCellFocus', false);
     return;
   }
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
   const tableLine = isTableLine(lineText);
-
-  vscode.commands.executeCommand('setContext', 'orgTableLineFocus', tableLine);
+  let focus = false;
+  if (tableLine) {
+    // Inside table: when the cursor is between the first and last '|'
+    const firstBar = lineText.indexOf('|');
+    const lastBar = lineText.lastIndexOf('|');
+    if (
+      firstBar !== -1 &&
+      lastBar !== -1 &&
+      pos.character > firstBar &&
+      pos.character < lastBar
+    ) {
+      focus = true;
+    }
+  }
+  vscode.commands.executeCommand('setContext', 'orgTableCellFocus', focus);
 }
