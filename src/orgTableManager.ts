@@ -453,14 +453,15 @@ function getLatestColWidths(editor: vscode.TextEditor, line: number): number[] {
 async function insertSeparatorLine(
   editor: vscode.TextEditor,
   line: number,
-  colWidths: number[]
+  colWidths?: number[]
 ) {
-  colWidths = getLatestColWidths(editor, line);
-  // Get the original indentation
+  // Always get the latest column widths
+  const latestColWidths = getLatestColWidths(editor, line);
+  // Always get indentation using getIndent
   const origLine = editor.document.lineAt(line).text;
   const indent = getIndent(origLine);
-  const sep = indent + formatSeparatorLine(colWidths);
-  const emptyRow = formatEmptyRow(colWidths, indent);
+  const sep = formatSeparatorLine(latestColWidths, indent);
+  const emptyRow = formatEmptyRow(latestColWidths, indent);
   await editor.edit(editBuilder => {
     editBuilder.replace(editor.document.lineAt(line).range, sep);
     // Insert empty row below
@@ -508,12 +509,14 @@ async function formatTable(
 async function insertEmptyRow(
   editor: vscode.TextEditor,
   endLine: number,
-  colWidths: number[]
+  colWidths?: number[]
 ) {
-  // Get the indentation of the previous line
+  // Always get the latest column widths
+  const latestColWidths = getLatestColWidths(editor, endLine);
+  // Always get indentation using getIndent
   const origLine = editor.document.lineAt(endLine).text;
   const indent = getIndent(origLine);
-  const emptyRow = formatEmptyRow(colWidths, indent);
+  const emptyRow = formatEmptyRow(latestColWidths, indent);
   const lastLine = editor.document.lineAt(endLine).range.end;
   await editor.edit(editBuilder => {
     editBuilder.insert(lastLine, '\n' + emptyRow);
@@ -595,9 +598,9 @@ function getDisplayWidth(str: string): number {
   return width;
 }
 
-// Format separator line
-function formatSeparatorLine(colWidths: number[]): string {
-  return '|' + colWidths.map(w => '-'.repeat(w + 2)).join('+') + '|';
+// Format separator line (with indentation support)
+function formatSeparatorLine(colWidths: number[], indent: string = ''): string {
+  return indent + '|' + colWidths.map(w => '-'.repeat(w + 2)).join('+') + '|';
 }
 
 // Format empty row
