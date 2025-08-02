@@ -134,7 +134,7 @@ export class OrgTableManager {
 
           // If the current line is a separator line, format it as a separator
           if (isSeparatorLine(lineText)) {
-            await formatAndInsertSeparator(editor, pos.line, colWidths);
+            await insertSeparatorLine(editor, pos.line, colWidths);
             return;
           }
 
@@ -376,7 +376,7 @@ function getLatestColWidths(editor: vscode.TextEditor, line: number): number[] {
 }
 
 // Format and insert separator line and empty row
-async function formatAndInsertSeparator(
+async function insertSeparatorLine(
   editor: vscode.TextEditor,
   line: number,
   colWidths: number[]
@@ -435,6 +435,7 @@ async function insertEmptyRow(
     editBuilder.insert(lastLine, '\n' + emptyRow);
   });
 }
+
 // Table line detection function (any string starting with '|')
 function isTableLine(text: string): boolean {
   return /^\|.*/.test(text);
