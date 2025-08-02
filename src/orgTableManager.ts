@@ -48,7 +48,9 @@ export class OrgTableManager {
           // Move vertically to the cell below, or add a new row if at the last row
           if (pos.line === endLine) {
             // Add a new empty row and move the cursor to the beginning of the same column
-            const emptyRow = formatEmptyRow(colWidths);
+            const m = lineText.match(/^([ \t]*)/);
+            const indent = m ? m[1] : '';
+            const emptyRow = indent + formatEmptyRow(colWidths);
             await editor.edit(editBuilder => {
               const lastLine = editor.document.lineAt(endLine).range.end;
               editBuilder.insert(lastLine, '\n' + emptyRow);
@@ -66,8 +68,6 @@ export class OrgTableManager {
             }
             // Move the cursor to the beginning of the same cell in the new row (consider indentation)
             const newRowText = emptyRow;
-            const m = lineText.match(/^([ \t]*)/);
-            const indentLen = m ? m[1].length : 0;
             const newCellMatches = [...newRowText.matchAll(/\|/g)];
             let offset = 0;
             if (cellIdx < newCellMatches.length - 1) {
@@ -77,7 +77,6 @@ export class OrgTableManager {
               // fallback: first column
               offset = newRowText.indexOf('| ') + 2;
             }
-            offset += indentLen;
             const newPos = new vscode.Position(pos.line + 1, offset);
             editor.selection = new vscode.Selection(newPos, newPos);
           } else if (pos.line + 1 <= endLine) {
