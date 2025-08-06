@@ -1,7 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { showAgendaView } from './orgAgendaView';
 import { OrgDocumentLinkProvider } from './orgDocumentLinkProvider';
 import { OrgDocumentSymbolProvider } from './orgDocumentSymbolProvider';
 import { OrgPathCompletionProvider } from './orgPathCompletionProvider';
@@ -24,15 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
       new OrgDocumentSymbolProvider()
     );
 
-  const showAgendaCommand = vscode.commands.registerCommand(
-    'org-lite.showAgenda',
-    showAgendaView
-  );
-
   // Push all disposables at once for clarity
   context.subscriptions.push(
     documentSymbolProvider,
-    showAgendaCommand,
     vscode.languages.registerDocumentLinkProvider(
       { language: 'org' },
       new OrgDocumentLinkProvider()

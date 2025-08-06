@@ -42,10 +42,6 @@
         "title": "Rotate TODO state (reverse)"
       },
       {
-        "command": "org-lite.showAgenda",
-        "title": "Show Agenda View"
-      },
-      {
         "command": "org-lite.formatOrgTable",
         "title": "Format Org Table"
       },
