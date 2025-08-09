@@ -1,24 +1,23 @@
 # Org Lite
 
-Org Lite brings the core experience of [Org mode](https://orgmode.org/) to Visual Studio Code in a simple, fast, and user-friendly way.
-It focuses on intuitive table editing, clickable links, TODO management, and a clean outline view—making your plain text organization productive and enjoyable.
+Org Lite brings the core experience of [Org mode](https://orgmode.org/) to Visual Studio Code.
+It focuses on intuitive table editing and task management—keeping plain text organization simple and efficient.
 
 ## Features
 
 - **Org Table Editing**
-  - `Tab`, `Shift+Tab`, and `Enter` for intuitive cell navigation
-  - Automatic table formatting and alignment, including support for full-width (ambiguous-width) characters
-  - Add, remove, and move columns left/right with keyboard shortcuts
+  - Intuitive cell navigation with `Tab`, `Shift+Tab`, and `Enter`
+  - Automatic table formatting and alignment (supports full-width characters)
+  - Add, delete, and move columns left/right (`Ctrl+Alt+Left/Right/K`)
   - Indentation-aware editing for nested tables
 
 - **Hyperlink Support**
   - `[[LINK]]` style links are highlighted and clickable
-  - Ctrl+Click (Cmd+Click) to open local files or URLs in the browser
+  - `Ctrl+Click (Cmd+Click)` to open local files or URLs in the browser
   - Path suggestion (completion) when editing inside `[[...` (experimental)
 
-- **TODO State Rotation & Task List**
+- **TODO State Rotation**
   - Quickly cycle `TODO` states with `Alt+Right/Left`
-  - Simple task list management
 
 - **Outline Support**
   - Org headings are recognized and shown in a [cleaner outline view](https://orgmode.org/org.html#Clean-View)
@@ -28,7 +27,7 @@ It focuses on intuitive table editing, clickable links, TODO management, and a c
 
 ## Requirements
 
-No special requirements. Just install the extension and start editing `.org` files in VS Code (version 1.102.0 or later).
+No special requirements. Just install the extension and start editing `.org` files in VS Code.
 All features work out of the box—no additional setup needed.
 
 ## Known Issues

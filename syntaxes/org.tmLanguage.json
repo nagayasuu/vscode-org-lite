@@ -5,6 +5,7 @@
   "patterns": [
     { "include": "#heading" },
     { "include": "#bold" },
+    { "include": "#code" },
     { "include": "#link" }
   ],
   "repository": {
@@ -71,6 +72,14 @@
         {
           "name": "markup.bold",
           "match": "\\*(.*?)\\*"
+        }
+      ]
+    },
+    "code": {
+      "patterns": [
+        {
+          "name": "markup.inline.raw.string.markdown",
+          "match": "\\~(.*?)\\~"
         }
       ]
     },

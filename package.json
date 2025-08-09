@@ -42,10 +42,6 @@
         "title": "Rotate TODO state (reverse)"
       },
       {
-        "command": "org-lite.showAgenda",
-        "title": "Show Agenda View"
-      },
-      {
         "command": "org-lite.formatOrgTable",
         "title": "Format Org Table"
       },
@@ -68,6 +64,10 @@
       {
         "command": "org-lite.tableMoveColumnRight",
         "title": "Move Org Table Column Right"
+      },
+      {
+        "command": "org-lite.tableDeleteColumn",
+        "title": "Delete Org Table Column"
       }
     ],
     "keybindings": [
@@ -109,6 +109,11 @@
       {
         "command": "org-lite.tableMoveColumnRight",
         "key": "ctrl+alt+right",
+        "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
+      },
+      {
+        "command": "org-lite.tableDeleteColumn",
+        "key": "ctrl+alt+k",
         "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
       }
     ]
