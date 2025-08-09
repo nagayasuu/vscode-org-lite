@@ -7,7 +7,11 @@ export class OrgDocumentSymbolProvider
     document: vscode.TextDocument,
     token: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.DocumentSymbol[]> {
-    const lines = document.getText().split('\n');
+    const text = document.getText();
+    // Detect line ending (CRLF, LF, or CR)
+    const match = text.match(/\r\n|\r|\n/);
+    const lineEnding = match ? match[0] : '\n';
+    const lines = text.split(lineEnding);
     const headingRegex = /^([ \t]*)(\*+)\s+(.+)$/;
     // Extract headings
     const headings: Array<{ title: string; level: number; start: number }> = [];
