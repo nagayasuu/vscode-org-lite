@@ -25,12 +25,19 @@ export class OrgPathCompletionProvider
       const filePath = path.join(absDir, file);
       const isDir = fs.statSync(filePath).isDirectory();
       const item = new vscode.CompletionItem(
-        file + (isDir ? '/' : ''),
+        file,
         isDir
           ? vscode.CompletionItemKind.Folder
           : vscode.CompletionItemKind.File
       );
-      item.insertText = file + (isDir ? '/' : '');
+      item.insertText = isDir ? file + '/' : file;
+      if (isDir) {
+        // Enable recursive suggestion: when user selects this folder, trigger further completion
+        item.command = {
+          command: 'editor.action.triggerSuggest',
+          title: 'Suggest',
+        };
+      }
       items.push(item);
     }
     return items;
