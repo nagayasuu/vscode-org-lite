@@ -64,6 +64,10 @@
       {
         "command": "org-lite.tableMoveColumnRight",
         "title": "Move Org Table Column Right"
+      },
+      {
+        "command": "org-lite.tableDeleteColumn",
+        "title": "Delete Org Table Column"
       }
     ],
     "keybindings": [
@@ -105,6 +109,11 @@
       {
         "command": "org-lite.tableMoveColumnRight",
         "key": "ctrl+alt+right",
+        "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
+      },
+      {
+        "command": "org-lite.tableDeleteColumn",
+        "key": "ctrl+alt+k",
         "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
       }
     ]

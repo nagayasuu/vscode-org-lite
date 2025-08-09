@@ -8,6 +8,65 @@ export class OrgTableManager {
    * org-mode table formatting command
    */
   public static registerCommands(context: vscode.ExtensionContext): void {
+    // Register org-lite.tableDeleteColumn command
+    const deleteColDisposable = vscode.commands.registerCommand(
+      'org-lite.tableDeleteColumn',
+      async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor || editor.document.languageId !== 'org') {
+          return;
+        }
+        const pos = editor.selection.active;
+        const lineText = editor.document.lineAt(pos.line).text;
+        if (!isTableLine(lineText)) return;
+        const { startLine, endLine } = detectTableRange(editor, pos.line);
+        const tableLines = getTableLines(editor, startLine, endLine);
+        const rows = splitTableRows(tableLines);
+        // Determine the current cell index
+        const cellIdx = getCellIndexAtPosition(lineText, pos.character);
+        // Remove the column at cellIdx from all rows
+        for (let r = 0; r < rows.length; r++) {
+          const row = rows[r];
+          if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) continue;
+          if (cellIdx < row.length) {
+            row.splice(cellIdx, 1);
+          }
+        }
+        // Reformat (handle last column deletion simply)
+        const colWidths = calcColWidths(rows);
+        if (colWidths.length === 0) {
+          // If all data rows are empty, delete all lines in the table range
+          const allEmpty = rows.every(
+            row =>
+              row.length === 0 ||
+              (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR)
+          );
+          if (allEmpty) {
+            await editor.edit(editBuilder => {
+              for (let i = startLine; i <= endLine; i++) {
+                editBuilder.delete(
+                  editor.document.lineAt(i).rangeIncludingLineBreak
+                );
+              }
+            });
+          }
+          return;
+        }
+        await formatTable(editor, startLine, endLine, rows, colWidths);
+        // Move the cursor to the start of the same row, same column (or previous column if at end)
+        const newLine = pos.line;
+        const newRowText = editor.document.lineAt(newLine).text;
+        const newCellIdx = Math.min(
+          cellIdx,
+          splitTableLineToCells(newRowText).length - 1
+        );
+        const offset = getCellOffsetInRow(newRowText, newCellIdx);
+        const newPos = new vscode.Position(newLine, offset);
+        editor.selection = new vscode.Selection(newPos, newPos);
+      }
+    );
+    context.subscriptions.push(deleteColDisposable);
+
     // Register org-lite.formatOrgTable command
     const formatOrgTableDisposable = vscode.commands.registerCommand(
       'org-lite.formatOrgTable',
@@ -39,6 +98,7 @@ export class OrgTableManager {
       }
     );
     context.subscriptions.push(formatOrgTableDisposable);
+
     // Update context key when cursor moves or editor changes
     context.subscriptions.push(
       vscode.window.onDidChangeTextEditorSelection(updateOrgTableLineFocus)
@@ -47,6 +107,7 @@ export class OrgTableManager {
       vscode.window.onDidChangeActiveTextEditor(updateOrgTableLineFocus)
     );
 
+    // Register org-lite.tableMoveColumnLeft and org-lite.tableMoveColumnRight commands
     const moveColLeftDisposable = vscode.commands.registerCommand(
       'org-lite.tableMoveColumnLeft',
       async () => {
@@ -224,6 +285,7 @@ export class OrgTableManager {
       }
     );
     context.subscriptions.push(formatTableDisposable);
+
     // Update context key when cursor moves or editor changes
     context.subscriptions.push(
       vscode.window.onDidChangeTextEditorSelection(updateOrgTableCellFocus)
