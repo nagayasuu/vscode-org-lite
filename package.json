@@ -118,13 +118,22 @@
       }
     ]
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nagayasuu/vscode-org-lite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nagayasuu/vscode-org-lite/issues"
+  },
   "scripts": {
+    "package": "npx -y @vscode/vsce package --no-dependencies",
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "format": "npx prettier --write ."
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
