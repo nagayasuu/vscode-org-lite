@@ -135,7 +135,7 @@ export async function moveTableColumn(direction: number) {
   editor.selection = new vscode.Selection(newPos, newPos);
 }
 
-// org-lite.tableEnterAction
+// org-lite.onTableEnter
 export async function onTableEnter() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
@@ -146,10 +146,8 @@ export async function onTableEnter() {
   const tableLine = orgTableUtils.isTableLine(lineText);
   if (!tableLine) return;
   const { startLine, endLine } = detectTableRange(editor, pos.line);
-  // Header row detection: is the first row of the table
   const isHeader = pos.line === startLine;
   if (isHeader) {
-    // Add a new column (refactored to insertColumn)
     await insertColumn(editor, startLine, endLine, pos.line);
   } else {
     // Always reformat the table before moving the cursor
@@ -340,34 +338,39 @@ export function updateOrgTableCellFocus() {
   vscode.commands.executeCommand('setContext', 'orgTableCellFocus', focus);
 }
 
-// Insert a new column at the end of the table
 async function insertColumn(
   editor: vscode.TextEditor,
   startLine: number,
   endLine: number,
   cursorLine: number
 ) {
+  const tableLines = getTableLines(editor, startLine, endLine);
+  const rows = orgTableUtils.splitTableRows(tableLines);
+  const newRows = orgTableUtils.addColumnToTableRows(rows);
+  const colWidths = orgTableUtils.calcColWidths(newRows);
+
+  const formattedLines = newRows.map((row, idx) => {
+    const origLine = editor.document.lineAt(startLine + idx).text;
+    const indent = orgTableUtils.getIndent(origLine);
+
+    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) {
+      return indent + orgTableUtils.formatSeparatorLine(colWidths);
+    }
+    return indent + orgTableUtils.formatTableRow(row, colWidths);
+  });
+
+  // Reflect the table in the editor
   await editor.edit(editBuilder => {
-    for (let i = startLine; i <= endLine; i++) {
-      const rowText = editor.document.lineAt(i).text;
-      if (orgTableUtils.isSeparatorLine(rowText)) {
-        // Insert "+--" before the last "|" at the end
-        const lastBar = rowText.lastIndexOf('|');
-        const newSep =
-          rowText.slice(0, lastBar) + '+--' + rowText.slice(lastBar);
-        editBuilder.replace(editor.document.lineAt(i).range, newSep);
-      } else {
-        // Insert " | " just before the last "|"
-        const lastBar = rowText.lastIndexOf('|');
-        const newRow =
-          rowText.slice(0, lastBar) + '|  ' + rowText.slice(lastBar);
-        editBuilder.replace(editor.document.lineAt(i).range, newRow);
-      }
+    for (let i = 0; i < formattedLines.length; i++) {
+      editBuilder.replace(
+        editor.document.lineAt(startLine + i).range,
+        formattedLines[i]
+      );
     }
   });
+
   // Move the cursor to the beginning of the new column
   const lineText = editor.document.lineAt(cursorLine).text;
-  // Just before the last '|'
   const newPos = new vscode.Position(cursorLine, lineText.length - 2);
   editor.selection = new vscode.Selection(newPos, newPos);
 }

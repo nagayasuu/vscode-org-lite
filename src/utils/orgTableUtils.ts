@@ -132,3 +132,13 @@ export function getCellOffsetInRow(rowText: string, cellIdx: number): number {
       : (cellMatches[cellMatches.length - 1]?.index ?? 0) + 1;
   }
 }
+
+export function addColumnToTableRows(rows: string[][]): string[][] {
+  return rows.map(row => {
+    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) {
+      return [...row];
+    } else {
+      return [...row, ''];
+    }
+  });
+}
