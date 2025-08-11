@@ -487,7 +487,6 @@ async function insertSeparatorLine(
   });
 }
 
-// Format and replace table rows (without adding a new row)
 async function formatTable(
   editor: vscode.TextEditor,
   startLine: number,
@@ -495,25 +494,24 @@ async function formatTable(
   rows: string[][],
   colWidths: number[]
 ) {
-  // Get the indentation of each line
   const indents: string[] = [];
+
   for (let i = startLine; i <= endLine; i++) {
     const line = editor.document.lineAt(i).text;
-    const m = line.match(/^([ \t]*)/);
-    indents.push(m ? m[1] : '');
+    indents.push(orgTableUtils.getIndent(line));
   }
-  const formatted = rows.map((row, idx) => {
-    const indent = indents[idx] || '';
-    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) {
-      return indent + orgTableUtils.formatSeparatorLine(colWidths);
-    }
-    return indent + orgTableUtils.formatTableRow(row, colWidths);
-  });
+
+  const formattedTableRows = orgTableUtils.formatTableRowsWithIndents(
+    rows,
+    colWidths,
+    indents
+  );
+
   await editor.edit(editBuilder => {
     for (let i = startLine; i <= endLine; i++) {
       editBuilder.replace(
         editor.document.lineAt(i).range,
-        formatted[i - startLine]
+        formattedTableRows[i - startLine]
       );
     }
   });

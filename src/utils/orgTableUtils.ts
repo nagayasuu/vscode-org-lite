@@ -232,3 +232,18 @@ export function getColWidthsFromTableLines(tableLines: string[]): number[] {
   // If the number of columns is 0, use 2 columns with width 3
   return colWidths.length === 0 ? [3, 3] : colWidths;
 }
+
+export function formatTableRowsWithIndents(
+  rows: string[][],
+  colWidths: number[],
+  indents: string[]
+): string[] {
+  return rows.map((row, idx) => {
+    const indent = indents[idx] || '';
+
+    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) {
+      return indent + formatSeparatorLine(colWidths);
+    }
+    return indent + formatTableRow(row, colWidths);
+  });
+}
