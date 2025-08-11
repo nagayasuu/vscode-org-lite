@@ -219,7 +219,7 @@ export async function moveToPrevTableCell() {
 }
 
 // org-lite.tableTabAction
-export async function tableTabAction() {
+export async function moveToNextTableCell() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
     return;

@@ -46,8 +46,8 @@
         "title": "Format Org Table"
       },
       {
-        "command": "org-lite.tableTabAction",
-        "title": "Format Org Table"
+        "command": "org-lite.moveToNextTableCell",
+        "title": "Move to Next Org Table Cell"
       },
       {
         "command": "org-lite.moveToPrevTableCell",
@@ -87,7 +87,7 @@
         "when": "editorTextFocus && editorLangId == org && orgTableLineFocus"
       },
       {
-        "command": "org-lite.tableTabAction",
+        "command": "org-lite.moveToNextTableCell",
         "key": "tab",
         "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
       },

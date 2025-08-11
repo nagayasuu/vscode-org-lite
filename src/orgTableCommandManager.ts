@@ -29,8 +29,8 @@ export class OrgTableCommandManager {
         callback: () => tableCommands.moveToPrevTableCell(),
       },
       {
-        command: 'org-lite.tableTabAction',
-        callback: () => tableCommands.tableTabAction(),
+        command: 'org-lite.moveToNextTableCell',
+        callback: () => tableCommands.moveToNextTableCell(),
       },
     ];
 
