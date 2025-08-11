@@ -238,6 +238,16 @@ export async function tableTabAction() {
     // If the current line is a separator line, format it as a separator
     if (orgTableUtils.isSeparatorLine(lineText)) {
       await insertSeparatorLine(editor, pos.line, colWidths);
+
+      // Move cursor to just after "| " of the new empty row
+      const origLine = editor.document.lineAt(pos.line).text;
+      const indent = orgTableUtils.getIndent(origLine);
+      const newPos = new vscode.Position(
+        pos.line + 1,
+        (indent.length || 0) + 2
+      );
+      editor.selection = new vscode.Selection(newPos, newPos);
+
       return;
     }
 
@@ -475,9 +485,6 @@ async function insertSeparatorLine(
     const sepEnd = editor.document.lineAt(line).range.end;
     editBuilder.insert(sepEnd, '\n' + emptyRow);
   });
-  // Move cursor to just after "| " of the new empty row
-  const newPos = new vscode.Position(line + 1, (indent.length || 0) + 2);
-  editor.selection = new vscode.Selection(newPos, newPos);
 }
 
 // Format and replace table rows (without adding a new row)
