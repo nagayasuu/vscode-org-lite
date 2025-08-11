@@ -196,7 +196,7 @@ export async function onTableEnter() {
 }
 
 // org-lite.tableShiftTabAction
-export async function tableShiftTabAction() {
+export async function moveToPrevTableCell() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
     return;

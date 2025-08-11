@@ -50,7 +50,7 @@
         "title": "Format Org Table"
       },
       {
-        "command": "org-lite.tableShiftTabAction",
+        "command": "org-lite.moveToPrevTableCell",
         "title": "Move to Previous Org Table Cell"
       },
       {
@@ -92,7 +92,7 @@
         "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
       },
       {
-        "command": "org-lite.tableShiftTabAction",
+        "command": "org-lite.moveToPrevTableCell",
         "key": "shift+tab",
         "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
       },

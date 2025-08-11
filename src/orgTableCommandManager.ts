@@ -25,8 +25,8 @@ export class OrgTableCommandManager {
         callback: () => tableCommands.onTableEnter(),
       },
       {
-        command: 'org-lite.tableShiftTabAction',
-        callback: () => tableCommands.tableShiftTabAction(),
+        command: 'org-lite.moveToPrevTableCell',
+        callback: () => tableCommands.moveToPrevTableCell(),
       },
       {
         command: 'org-lite.tableTabAction',
