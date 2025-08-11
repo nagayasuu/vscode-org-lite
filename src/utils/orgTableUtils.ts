@@ -183,3 +183,45 @@ export function getPrevCellPositionInfo(
   }
   return null;
 }
+
+export function getNextCellPositionInfo(
+  lines: string[],
+  currentLine: number,
+  charPos: number,
+  startLine: number,
+  endLine: number
+): { line: number; offset: number } | null {
+  const currentRowText = lines[currentLine];
+  let cellIdx = getCellIndexAtPosition(currentRowText, charPos);
+  const cellMatches = [...currentRowText.matchAll(/\|/g)];
+
+  if (charPos === currentRowText.length && cellMatches.length >= 2) {
+    cellIdx = cellMatches.length - 2;
+  }
+
+  if (cellIdx < cellMatches.length - 2) {
+    const nextCellStart = cellMatches[cellIdx + 1].index ?? 0;
+    let offset = nextCellStart + 1;
+
+    if (currentRowText[offset] === ' ') offset++;
+    return { line: currentLine, offset };
+  } else if (currentLine < endLine) {
+    const nextRowText = lines[currentLine + 1];
+
+    if (isSeparatorLine(nextRowText) && currentLine + 2 <= endLine) {
+      const afterSepText = lines[currentLine + 2];
+      const firstCell = afterSepText.indexOf('| ');
+
+      if (firstCell !== -1) {
+        return { line: currentLine + 2, offset: firstCell + 2 };
+      }
+    } else {
+      const firstCell = nextRowText.indexOf('| ');
+
+      if (firstCell !== -1) {
+        return { line: currentLine + 1, offset: firstCell + 2 };
+      }
+    }
+  }
+  return null;
+}

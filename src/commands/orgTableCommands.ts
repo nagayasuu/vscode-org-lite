@@ -399,47 +399,28 @@ function getPrevCellPosition(
   return null;
 }
 
-// Function to return the position to move to the next cell or the first cell of the next row with Tab key
 function getNextCellPosition(
   editor: vscode.TextEditor,
   pos: vscode.Position,
   startLine: number,
   endLine: number
 ): vscode.Position | null {
-  const currentRowText = editor.document.lineAt(pos.line).text;
-  let cellIdx = orgTableUtils.getCellIndexAtPosition(
-    currentRowText,
-    pos.character
-  );
-  const cellMatches = [...currentRowText.matchAll(/\|/g)];
-  // If at the end of the line, always set cellIdx to the last cell section
-  if (pos.character === currentRowText.length && cellMatches.length >= 2) {
-    cellIdx = cellMatches.length - 2;
+  const lines: string[] = [];
+
+  for (let i = startLine; i <= endLine; i++) {
+    lines[i] = editor.document.lineAt(i).text;
   }
-  // Move to next cell in the row, or first cell of next row
-  if (cellIdx < cellMatches.length - 2) {
-    // Next cell in the same row
-    const nextCellStart = cellMatches[cellIdx + 1].index ?? 0;
-    // Skip space after '|'
-    let offset = nextCellStart + 1;
-    if (currentRowText[offset] === ' ') offset++;
-    return new vscode.Position(pos.line, offset);
-  } else if (pos.line < endLine) {
-    // First cell of next row
-    const nextRowText = editor.document.lineAt(pos.line + 1).text;
-    if (orgTableUtils.isSeparatorLine(nextRowText) && pos.line + 2 <= endLine) {
-      // If the next line is a separator, move to the first cell of the line after next
-      const afterSepText = editor.document.lineAt(pos.line + 2).text;
-      const firstCell = afterSepText.indexOf('| ');
-      if (firstCell !== -1) {
-        return new vscode.Position(pos.line + 2, firstCell + 2);
-      }
-    } else {
-      const firstCell = nextRowText.indexOf('| ');
-      if (firstCell !== -1) {
-        return new vscode.Position(pos.line + 1, firstCell + 2);
-      }
-    }
+
+  const info = orgTableUtils.getNextCellPositionInfo(
+    lines,
+    pos.line,
+    pos.character,
+    startLine,
+    endLine
+  );
+
+  if (info) {
+    return new vscode.Position(info.line, info.offset);
   }
   return null;
 }
