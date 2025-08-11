@@ -46,15 +46,15 @@
         "title": "Format Org Table"
       },
       {
-        "command": "org-lite.tableTabAction",
-        "title": "Format Org Table"
+        "command": "org-lite.moveToNextTableCell",
+        "title": "Move to Next Org Table Cell"
       },
       {
-        "command": "org-lite.tableShiftTabAction",
+        "command": "org-lite.moveToPrevTableCell",
         "title": "Move to Previous Org Table Cell"
       },
       {
-        "command": "org-lite.tableEnterAction",
+        "command": "org-lite.onTableEnter",
         "title": "Org Table Enter Action"
       },
       {
@@ -87,17 +87,17 @@
         "when": "editorTextFocus && editorLangId == org && orgTableLineFocus"
       },
       {
-        "command": "org-lite.tableTabAction",
+        "command": "org-lite.moveToNextTableCell",
         "key": "tab",
         "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
       },
       {
-        "command": "org-lite.tableShiftTabAction",
+        "command": "org-lite.moveToPrevTableCell",
         "key": "shift+tab",
         "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
       },
       {
-        "command": "org-lite.tableEnterAction",
+        "command": "org-lite.onTableEnter",
         "key": "enter",
         "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
       },
@@ -118,13 +118,22 @@
       }
     ]
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nagayasuu/vscode-org-lite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nagayasuu/vscode-org-lite/issues"
+  },
   "scripts": {
+    "package": "npx -y @vscode/vsce package --no-dependencies",
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "format": "npx prettier --write ."
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
