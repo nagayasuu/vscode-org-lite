@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { ORG_TABLE_SEPARATOR } from '../constants';
 import * as orgTableUtils from '../utils/orgTableUtils';
 
-// org-lite.tableDeleteColumn
 export async function deleteTableColumn() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
@@ -54,7 +53,6 @@ export async function deleteTableColumn() {
   editor.selection = new vscode.Selection(newPos, newPos);
 }
 
-// org-lite.formatOrgTable
 export async function formatOrgTable() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
@@ -82,7 +80,6 @@ export async function formatOrgTable() {
   editor.selection = new vscode.Selection(newPos, newPos);
 }
 
-// org-lite.tableMoveColumnLeft
 export async function moveTableColumn(direction: number) {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
@@ -135,7 +132,6 @@ export async function moveTableColumn(direction: number) {
   editor.selection = new vscode.Selection(newPos, newPos);
 }
 
-// org-lite.onTableEnter
 export async function onTableEnter() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
@@ -195,7 +191,6 @@ export async function onTableEnter() {
   }
 }
 
-// org-lite.tableShiftTabAction
 export async function moveToPrevTableCell() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
@@ -218,7 +213,6 @@ export async function moveToPrevTableCell() {
   }
 }
 
-// org-lite.tableTabAction
 export async function moveToNextTableCell() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
