@@ -555,6 +555,7 @@ function getTableLines(
   endLine: number
 ): string[] {
   const lines: string[] = [];
+
   for (let i = startLine; i <= endLine; i++) {
     lines.push(editor.document.lineAt(i).text);
   }
