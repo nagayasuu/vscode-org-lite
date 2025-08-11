@@ -247,3 +247,23 @@ export function formatTableRowsWithIndents(
     return indent + formatTableRow(row, colWidths);
   });
 }
+
+export function detectTableRangeFromLines(
+  lines: string[],
+  line: number
+): { startLine: number; endLine: number } {
+  let startLine = line;
+  let endLine = line;
+
+  while (startLine > 0 && /^\s*\|.*\|\s*$/.test(lines[startLine - 1])) {
+    startLine--;
+  }
+
+  while (
+    endLine < lines.length - 1 &&
+    /^\s*\|.*\|\s*$/.test(lines[endLine + 1])
+  ) {
+    endLine++;
+  }
+  return { startLine, endLine };
+}

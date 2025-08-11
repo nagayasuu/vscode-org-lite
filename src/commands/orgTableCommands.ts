@@ -535,26 +535,17 @@ async function insertEmptyRow(
   });
 }
 
-// Detect table range (startLine, endLine)
 function detectTableRange(
   editor: vscode.TextEditor,
   line: number
 ): { startLine: number; endLine: number } {
-  let startLine = line;
-  let endLine = line;
-  while (
-    startLine > 0 &&
-    /^\s*\|.*\|\s*$/.test(editor.document.lineAt(startLine - 1).text)
-  ) {
-    startLine--;
+  const lines: string[] = [];
+
+  for (let i = 0; i < editor.document.lineCount; i++) {
+    lines.push(editor.document.lineAt(i).text);
   }
-  while (
-    endLine < editor.document.lineCount - 1 &&
-    /^\s*\|.*\|\s*$/.test(editor.document.lineAt(endLine + 1).text)
-  ) {
-    endLine++;
-  }
-  return { startLine, endLine };
+
+  return orgTableUtils.detectTableRangeFromLines(lines, line);
 }
 
 // Get table lines in range
