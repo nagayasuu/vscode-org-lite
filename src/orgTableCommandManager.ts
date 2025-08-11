@@ -21,8 +21,8 @@ export class OrgTableCommandManager {
         callback: () => tableCommands.moveTableColumn(1),
       },
       {
-        command: 'org-lite.tableEnterAction',
-        callback: () => tableCommands.tableEnterAction(),
+        command: 'org-lite.onTableEnter',
+        callback: () => tableCommands.onTableEnter(),
       },
       {
         command: 'org-lite.tableShiftTabAction',

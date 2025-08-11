@@ -136,7 +136,7 @@ export async function moveTableColumn(direction: number) {
 }
 
 // org-lite.tableEnterAction
-export async function tableEnterAction() {
+export async function onTableEnter() {
   const editor = vscode.window.activeTextEditor;
   if (!editor || editor.document.languageId !== 'org') {
     return;
