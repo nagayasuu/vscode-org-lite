@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
-
-// Special marker for separator lines in table row arrays
-const ORG_TABLE_SEPARATOR = '__SEPARATOR__';
+import { ORG_TABLE_SEPARATOR } from './constants';
 
 export class OrgTableManager {
   /**
