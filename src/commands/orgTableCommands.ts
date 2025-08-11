@@ -148,7 +148,12 @@ export async function onTableEnter() {
   const { startLine, endLine } = detectTableRange(editor, pos.line);
   const isHeader = pos.line === startLine;
   if (isHeader) {
-    await insertColumn(editor, startLine, endLine, pos.line);
+    await insertColumn(editor, startLine, endLine);
+
+    // Move the cursor to the beginning of the new column
+    const lineText = editor.document.lineAt(pos.line).text;
+    const newPos = new vscode.Position(pos.line, lineText.length - 2);
+    editor.selection = new vscode.Selection(newPos, newPos);
   } else {
     // Always reformat the table before moving the cursor
     const tableLines = getTableLines(editor, startLine, endLine);
@@ -341,8 +346,7 @@ export function updateOrgTableCellFocus() {
 async function insertColumn(
   editor: vscode.TextEditor,
   startLine: number,
-  endLine: number,
-  cursorLine: number
+  endLine: number
 ) {
   const tableLines = getTableLines(editor, startLine, endLine);
   const rows = orgTableUtils.splitTableRows(tableLines);
@@ -368,54 +372,29 @@ async function insertColumn(
       );
     }
   });
-
-  // Move the cursor to the beginning of the new column
-  const lineText = editor.document.lineAt(cursorLine).text;
-  const newPos = new vscode.Position(cursorLine, lineText.length - 2);
-  editor.selection = new vscode.Selection(newPos, newPos);
 }
 
-// Function to return the position to move to the previous cell or previous row's last cell with Shift+Tab
 function getPrevCellPosition(
   editor: vscode.TextEditor,
   pos: vscode.Position,
   startLine: number,
   endLine: number
 ): vscode.Position | null {
-  const currentRowText = editor.document.lineAt(pos.line).text;
-  const cellIdx = orgTableUtils.getCellIndexAtPosition(
-    currentRowText,
-    pos.character - 1
+  const lines: string[] = [];
+
+  for (let i = startLine; i <= endLine; i++) {
+    lines[i] = editor.document.lineAt(i).text;
+  }
+
+  const info = orgTableUtils.getPrevCellPositionInfo(
+    lines,
+    pos.line,
+    pos.character,
+    startLine
   );
-  const cellMatches = [...currentRowText.matchAll(/\|/g)];
-  // If at the beginning of the line (first cell), move to the last cell of the previous row
-  if (cellIdx === 0 && pos.line > startLine) {
-    let prevLine = pos.line - 1;
-    // Skip separator lines
-    while (
-      prevLine >= startLine &&
-      orgTableUtils.isSeparatorLine(editor.document.lineAt(prevLine).text)
-    ) {
-      prevLine--;
-    }
-    if (prevLine >= startLine) {
-      const prevRowText = editor.document.lineAt(prevLine).text;
-      const prevCellMatches = [...prevRowText.matchAll(/\|/g)];
-      if (prevCellMatches.length >= 2) {
-        // Start of the last cell
-        const lastCellStart =
-          prevCellMatches[prevCellMatches.length - 2].index ?? 0;
-        let offset = lastCellStart + 1;
-        if (prevRowText[offset] === ' ') offset++;
-        return new vscode.Position(prevLine, offset);
-      }
-    }
-  } else if (cellIdx > 0) {
-    // Previous cell
-    const prevCellStart = cellMatches[cellIdx - 1].index ?? 0;
-    let offset = prevCellStart + 1;
-    if (currentRowText[offset] === ' ') offset++;
-    return new vscode.Position(pos.line, offset);
+
+  if (info) {
+    return new vscode.Position(info.line, info.offset);
   }
   return null;
 }

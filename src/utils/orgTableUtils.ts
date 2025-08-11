@@ -142,3 +142,44 @@ export function addColumnToTableRows(rows: string[][]): string[][] {
     }
   });
 }
+
+export function getPrevCellPositionInfo(
+  lines: string[],
+  currentLine: number,
+  charPos: number,
+  startLine: number
+): { line: number; offset: number } | null {
+  const currentRowText = lines[currentLine];
+  const cellIdx = getCellIndexAtPosition(currentRowText, charPos - 1);
+  const cellMatches = [...currentRowText.matchAll(/\|/g)];
+
+  if (cellIdx === 0 && currentLine > startLine) {
+    let prevLine = currentLine - 1;
+
+    // Skip separator lines
+    while (prevLine >= startLine && isSeparatorLine(lines[prevLine])) {
+      prevLine--;
+    }
+
+    if (prevLine >= startLine) {
+      const prevRowText = lines[prevLine];
+      const prevCellMatches = [...prevRowText.matchAll(/\|/g)];
+
+      if (prevCellMatches.length >= 2) {
+        const lastCellStart =
+          prevCellMatches[prevCellMatches.length - 2].index ?? 0;
+        let offset = lastCellStart + 1;
+
+        if (prevRowText[offset] === ' ') offset++;
+        return { line: prevLine, offset };
+      }
+    }
+  } else if (cellIdx > 0) {
+    const prevCellStart = cellMatches[cellIdx - 1].index ?? 0;
+    let offset = prevCellStart + 1;
+
+    if (currentRowText[offset] === ' ') offset++;
+    return { line: currentLine, offset };
+  }
+  return null;
+}
