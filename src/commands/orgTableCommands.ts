@@ -430,6 +430,7 @@ function getLatestColWidths(editor: vscode.TextEditor, line: number): number[] {
   let startLine = line,
     endLine = line;
   const doc = editor.document;
+
   // Search upwards
   while (
     startLine > 0 &&
@@ -437,6 +438,7 @@ function getLatestColWidths(editor: vscode.TextEditor, line: number): number[] {
   ) {
     startLine--;
   }
+
   // Search downwards
   while (
     endLine < doc.lineCount - 1 &&
@@ -444,15 +446,14 @@ function getLatestColWidths(editor: vscode.TextEditor, line: number): number[] {
   ) {
     endLine++;
   }
+
   const tableLines: string[] = [];
+
   for (let i = startLine; i <= endLine; i++) {
     const t = doc.lineAt(i).text;
     if (!orgTableUtils.isSeparatorLine(t)) tableLines.push(t);
   }
-  const rows = orgTableUtils.splitTableRows(tableLines);
-  const colWidths = orgTableUtils.calcColWidths(rows);
-  // If the number of columns is 0, use 2 columns with width 3
-  return colWidths.length === 0 ? [3, 3] : colWidths;
+  return orgTableUtils.getColWidthsFromTableLines(tableLines);
 }
 
 // Format and insert separator line and empty row

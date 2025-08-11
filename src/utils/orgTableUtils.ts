@@ -225,3 +225,10 @@ export function getNextCellPositionInfo(
   }
   return null;
 }
+
+export function getColWidthsFromTableLines(tableLines: string[]): number[] {
+  const rows = splitTableRows(tableLines);
+  const colWidths = calcColWidths(rows);
+  // If the number of columns is 0, use 2 columns with width 3
+  return colWidths.length === 0 ? [3, 3] : colWidths;
+}
