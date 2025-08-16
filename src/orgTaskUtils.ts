@@ -1,4 +1,4 @@
-import { HEADING_REGEX, TASK_STATE } from '../constants';
+import { HEADING_REGEX, TASK_STATE } from './constants';
 
 export function isHeadingLine(lineText: string): boolean {
   return HEADING_REGEX.test(lineText);

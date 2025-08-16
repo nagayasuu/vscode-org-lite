@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as tableCommands from './commands/orgTableCommands';
+import * as tableCommands from './orgTableCommands';
 
 export class OrgTableCommandManager {
   public static registerCommands(context: vscode.ExtensionContext): void {

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { ORG_TABLE_SEPARATOR } from '../constants';
-import * as orgTableUtils from '../utils/orgTableUtils';
+import { ORG_TABLE_SEPARATOR } from './constants';
+import * as orgTableUtils from './orgTableUtils';
 
 export async function deleteTableColumn() {
   const editor = vscode.window.activeTextEditor;

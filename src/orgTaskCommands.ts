@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as orgTaskUtils from '../utils/orgTaskUtils';
+import * as orgTaskUtils from './orgTaskUtils';
 
 export function rotateTaskState(reverse: boolean = false): void {
   const editor = vscode.window.activeTextEditor;

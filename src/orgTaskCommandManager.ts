@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as taskCommands from './commands/orgTaskCommands';
+import * as taskCommands from './orgTaskCommands';
 
 export class OrgTaskCommandManager {
   public static registerCommands(context: vscode.ExtensionContext): void {
