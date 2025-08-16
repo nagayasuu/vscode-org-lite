@@ -143,6 +143,60 @@ export function addColumnToTableRows(rows: string[][]): string[][] {
   });
 }
 
+// Remove a column (cellIdx) from all data rows (pure function)
+export function removeColumnFromRows(
+  rows: string[][],
+  cellIdx: number
+): string[][] {
+  return rows.map(row => {
+    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) return [...row];
+    const newRow = [...row];
+    if (cellIdx >= 0 && cellIdx < newRow.length) {
+      newRow.splice(cellIdx, 1);
+    }
+    return newRow;
+  });
+}
+
+// Pad all data rows to the maximum number of columns (pure function)
+export function padRowsToMaxCols(rows: string[][]): string[][] {
+  const dataRows = rows.filter(
+    r => !(r.length === 1 && r[0] === ORG_TABLE_SEPARATOR)
+  );
+  const maxCols =
+    dataRows.length === 0 ? 0 : Math.max(...dataRows.map(r => r.length));
+  return rows.map(row => {
+    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) return [...row];
+    const newRow = [...row];
+    while (newRow.length < maxCols) newRow.push('');
+    return newRow;
+  });
+}
+
+// Swap two columns (fromIdx, toIdx) across all data rows (pure function)
+export function swapColumns(
+  rows: string[][],
+  fromIdx: number,
+  toIdx: number
+): string[][] {
+  if (fromIdx === toIdx) return rows.map(r => [...r]);
+  return rows.map(row => {
+    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) return [...row];
+    const newRow = [...row];
+    if (
+      fromIdx >= 0 &&
+      toIdx >= 0 &&
+      fromIdx < newRow.length &&
+      toIdx < newRow.length
+    ) {
+      const tmp = newRow[fromIdx];
+      newRow[fromIdx] = newRow[toIdx];
+      newRow[toIdx] = tmp;
+    }
+    return newRow;
+  });
+}
+
 export function getPrevCellPositionInfo(
   lines: string[],
   currentLine: number,

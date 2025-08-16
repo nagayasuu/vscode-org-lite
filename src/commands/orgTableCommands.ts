@@ -15,19 +15,13 @@ export async function deleteTableColumn() {
   const rows = orgTableUtils.splitTableRows(tableLines);
   // Determine the current cell index
   const cellIdx = orgTableUtils.getCellIndexAtPosition(lineText, pos.character);
-  // Remove the column at cellIdx from all rows
-  for (let r = 0; r < rows.length; r++) {
-    const row = rows[r];
-    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) continue;
-    if (cellIdx < row.length) {
-      row.splice(cellIdx, 1);
-    }
-  }
+  // Remove the column at cellIdx from all rows (pure)
+  const newRows = orgTableUtils.removeColumnFromRows(rows, cellIdx);
   // Reformat (handle last column deletion simply)
-  const colWidths = orgTableUtils.calcColWidths(rows);
+  const colWidths = orgTableUtils.calcColWidths(newRows);
   if (colWidths.length === 0) {
     // If all data rows are empty, delete all lines in the table range
-    const allEmpty = rows.every(
+    const allEmpty = newRows.every(
       row =>
         row.length === 0 || (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR)
     );
@@ -40,7 +34,7 @@ export async function deleteTableColumn() {
     }
     return;
   }
-  await formatTable(editor, startLine, endLine, rows, colWidths);
+  await formatTable(editor, startLine, endLine, newRows, colWidths);
   // Move the cursor to the start of the same row, same column (or previous column if at end)
   const newLine = pos.line;
   const newRowText = editor.document.lineAt(newLine).text;
@@ -93,35 +87,26 @@ export async function moveTableColumn(direction: number) {
   const rows = orgTableUtils.splitTableRows(tableLines);
   // Determine the current cell index
   const cellIdx = orgTableUtils.getCellIndexAtPosition(lineText, pos.character);
-  // Get the maximum number of columns and pad all rows
+  // Normalize rows to same column count (pure)
+  const paddedRows = orgTableUtils.padRowsToMaxCols(rows);
+  // Determine maxCols for boundary checks
   const maxCols = Math.max(
-    ...rows
+    ...paddedRows
       .filter(r => !(r.length === 1 && r[0] === ORG_TABLE_SEPARATOR))
       .map(r => r.length)
   );
-  for (let r = 0; r < rows.length; r++) {
-    const row = rows[r];
-    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) continue;
-    while (row.length < maxCols) row.push('');
-  }
   // Check for left/right edge
   if (direction === -1 && cellIdx <= 0) return;
   if (direction === 1 && cellIdx >= maxCols - 1) return;
-  // Swap columns
-  for (let r = 0; r < rows.length; r++) {
-    const row = rows[r];
-    if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) continue;
-    const from = cellIdx;
-    const to = cellIdx + direction;
-    if (to >= 0 && to < row.length) {
-      const tmp = row[from];
-      row[from] = row[to];
-      row[to] = tmp;
-    }
-  }
+  // Swap columns (pure)
+  const swappedRows = orgTableUtils.swapColumns(
+    paddedRows,
+    cellIdx,
+    cellIdx + direction
+  );
   // Reformat
-  const colWidths = orgTableUtils.calcColWidths(rows);
-  await formatTable(editor, startLine, endLine, rows, colWidths);
+  const colWidths = orgTableUtils.calcColWidths(swappedRows);
+  await formatTable(editor, startLine, endLine, swappedRows, colWidths);
   // Move the cursor
   const newLine = pos.line;
   const newRowText = editor.document.lineAt(newLine).text;
