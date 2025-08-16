@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { ORG_LANGUAGE } from './constants';
 import { OrgDocumentLinkProvider } from './orgDocumentLinkProvider';
 import { OrgDocumentSymbolProvider } from './orgDocumentSymbolProvider';
 import { OrgPathCompletionProvider } from './orgPathCompletionProvider';
@@ -10,24 +11,26 @@ import { OrgTaskCommandManager } from './orgTaskCommandManager';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  // Org table format command
+  registerCommands(context);
+
+  const providers = registerProviders();
+  context.subscriptions.push(...providers);
+}
+
+function registerCommands(context: vscode.ExtensionContext) {
+  // Register command managers (they handle their own disposables)
   OrgTableCommandManager.registerCommands(context);
-
-  // Register TODO rotation commands
   OrgTaskCommandManager.registerCommands(context);
+}
 
-  // Register Document Symbol Provider for Outline view
-  const documentSymbolProvider =
+function registerProviders(): vscode.Disposable[] {
+  return [
     vscode.languages.registerDocumentSymbolProvider(
-      { language: 'org' },
+      ORG_LANGUAGE,
       new OrgDocumentSymbolProvider()
-    );
-
-  // Push all disposables at once for clarity
-  context.subscriptions.push(
-    documentSymbolProvider,
+    ),
     vscode.languages.registerDocumentLinkProvider(
-      { language: 'org' },
+      ORG_LANGUAGE,
       new OrgDocumentLinkProvider()
     ),
     vscode.languages.registerCompletionItemProvider(
@@ -35,8 +38,8 @@ export function activate(context: vscode.ExtensionContext) {
       new OrgPathCompletionProvider(),
       '[',
       '/'
-    )
-  );
+    ),
+  ];
 }
 
 // This method is called when your extension is deactivated

@@ -1,3 +1,4 @@
+export const ORG_LANGUAGE = { language: 'org' };
 export const ORG_TABLE_SEPARATOR = '__SEPARATOR__';
 export const HEADING_REGEX = /^(\s*)(\*)\s+(.*)$/;
 export const TASK_STATE = {
