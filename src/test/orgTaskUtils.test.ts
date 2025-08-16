@@ -17,9 +17,12 @@ test('isHeadingLine', () => {
 suite('replaceTaskState', () => {
   test('reverse is false', () => {
     const cases = [
-      { input: '* TODO test', expected: '* DONE test' },
-      { input: '* DONE test', expected: '* test' },
-      { input: '* test', expected: '* TODO test' },
+      { input: '* TODO Heading 1', expected: '* DONE Heading 1' },
+      { input: '* DONE Heading 1', expected: '* Heading 1' },
+      { input: '* Heading 1', expected: '* TODO Heading 1' },
+      { input: '  * TODO Heading 2', expected: '  * DONE Heading 2' },
+      { input: '  * DONE Heading 2', expected: '  * Heading 2' },
+      { input: '  * Heading 2', expected: '  * TODO Heading 2' },
     ];
 
     for (const { input, expected } of cases) {
@@ -29,9 +32,12 @@ suite('replaceTaskState', () => {
 
   test('reverse is true', () => {
     const cases = [
-      { input: '* TODO test', expected: '* test' },
-      { input: '* DONE test', expected: '* TODO test' },
-      { input: '* test', expected: '* DONE test' },
+      { input: '* TODO Heading 1', expected: '* Heading 1' },
+      { input: '* DONE Heading 1', expected: '* TODO Heading 1' },
+      { input: '* Heading 1', expected: '* DONE Heading 1' },
+      { input: '  * TODO Heading 2', expected: '  * Heading 2' },
+      { input: '  * DONE Heading 2', expected: '  * TODO Heading 2' },
+      { input: '  * Heading 2', expected: '  * DONE Heading 2' },
     ];
 
     for (const { input, expected } of cases) {
