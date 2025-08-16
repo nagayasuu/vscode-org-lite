@@ -5,12 +5,12 @@ export class OrgTaskCommandManager {
   public static registerCommands(context: vscode.ExtensionContext): void {
     const commandRegistrations = [
       {
-        command: 'org-lite.rotateTodo',
-        callback: () => taskCommands.rotateTodoState(false),
+        command: 'org-lite.rotateTaskState',
+        callback: () => taskCommands.rotateTaskState(false),
       },
       {
-        command: 'org-lite.rotateTodoReverse',
-        callback: () => taskCommands.rotateTodoState(true),
+        command: 'org-lite.rotateTaskStateReverse',
+        callback: () => taskCommands.rotateTaskState(true),
       },
     ];
 

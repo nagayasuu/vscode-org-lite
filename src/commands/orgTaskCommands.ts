@@ -1,9 +1,7 @@
 import * as vscode from 'vscode';
+import * as orgTaskUtils from '../utils/orgTaskUtils';
 
-/**
- * Rotate TODO states on the current line
- */
-export function rotateTodoState(reverse: boolean = false): void {
+export function rotateTaskState(reverse: boolean = false): void {
   const editor = vscode.window.activeTextEditor;
   if (!editor) return;
 
@@ -16,33 +14,13 @@ export function rotateTodoState(reverse: boolean = false): void {
 
   const position = editor.selection.active;
   const lineText = editor.document.lineAt(position.line).text;
-  const headingMatch = lineText.match(/^(\s*)(\*)\s+(.*)$/);
-  if (!headingMatch) {
+
+  if (!orgTaskUtils.isHeadingLine(lineText)) {
     vscode.window.showInformationMessage('Cursor must be on a heading line');
     return;
   }
-  const [, indent, stars, content] = headingMatch;
 
-  let newLineText = '';
-  const todo = 'TODO ';
-  const done = 'DONE ';
-  if (reverse) {
-    if (content.startsWith(done)) {
-      newLineText = `${indent}${stars} ${todo}${content.slice(done.length)}`;
-    } else if (content.startsWith(todo)) {
-      newLineText = `${indent}${stars} ${content.slice(todo.length)}`;
-    } else {
-      newLineText = `${indent}${stars} ${done}${content}`;
-    }
-  } else {
-    if (content.startsWith(todo)) {
-      newLineText = `${indent}${stars} ${done}${content.slice(todo.length)}`;
-    } else if (content.startsWith(done)) {
-      newLineText = `${indent}${stars} ${content.slice(done.length)}`;
-    } else {
-      newLineText = `${indent}${stars} ${todo}${content}`;
-    }
-  }
+  const newLineText = orgTaskUtils.replaceTaskState(lineText, reverse);
 
   const range = new vscode.Range(
     position.line,
@@ -50,5 +28,6 @@ export function rotateTodoState(reverse: boolean = false): void {
     position.line,
     lineText.length
   );
+
   editor.edit(editBuilder => editBuilder.replace(range, newLineText));
 }
