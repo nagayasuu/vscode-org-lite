@@ -1,4 +1,4 @@
-import { ORG_TABLE_SEPARATOR } from '../constants';
+import { ORG_TABLE_SEPARATOR } from './constants';
 
 // Cell index utility
 export function getCellIndexAtPosition(

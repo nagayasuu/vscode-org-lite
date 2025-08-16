@@ -5,7 +5,7 @@ import { OrgDocumentLinkProvider } from './orgDocumentLinkProvider';
 import { OrgDocumentSymbolProvider } from './orgDocumentSymbolProvider';
 import { OrgPathCompletionProvider } from './orgPathCompletionProvider';
 import { OrgTableCommandManager } from './orgTableCommandManager';
-import { OrgTaskManager } from './orgTaskManager';
+import { OrgTaskCommandManager } from './orgTaskCommandManager';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
   OrgTableCommandManager.registerCommands(context);
 
   // Register TODO rotation commands
-  OrgTaskManager.registerCommands(context);
+  OrgTaskCommandManager.registerCommands(context);
 
   // Register Document Symbol Provider for Outline view
   const documentSymbolProvider =

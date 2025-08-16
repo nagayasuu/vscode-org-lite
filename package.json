@@ -34,12 +34,12 @@
     ],
     "commands": [
       {
-        "command": "org-lite.rotateTodo",
-        "title": "Rotate TODO state"
+        "command": "org-lite.rotateTaskState",
+        "title": "Rotate task state"
       },
       {
-        "command": "org-lite.rotateTodoReverse",
-        "title": "Rotate TODO state (reverse)"
+        "command": "org-lite.rotateTaskStateReverse",
+        "title": "Rotate task state (reverse)"
       },
       {
         "command": "org-lite.formatOrgTable",
@@ -72,12 +72,12 @@
     ],
     "keybindings": [
       {
-        "command": "org-lite.rotateTodo",
+        "command": "org-lite.rotateTaskState",
         "key": "alt+right",
         "when": "editorLangId == org"
       },
       {
-        "command": "org-lite.rotateTodoReverse",
+        "command": "org-lite.rotateTaskStateReverse",
         "key": "alt+left",
         "when": "editorLangId == org"
       },
