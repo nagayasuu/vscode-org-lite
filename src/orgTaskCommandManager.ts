@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 /**
  * TODO Rotation functionality for Org mode files
  */
-export class OrgTaskManager {
+export class OrgTaskCommandManager {
   /**
    * Register TODO rotation commands
    */
