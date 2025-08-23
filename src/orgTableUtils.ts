@@ -19,20 +19,20 @@ export function getCellIndexAtPosition(
   return cellIdx;
 }
 
-// Indentation utility
 export function getIndent(text: string): string {
   const m = text.match(/^([ \t]*)/);
   return m ? m[1] : '';
 }
 
-// Calculate column widths
 export function calcColWidths(rows: string[][]): number[] {
   // Exclude separator rows ([ORG_TABLE_SEPARATOR]) from width calculation
   const dataRows = rows.filter(
     row => !(row.length === 1 && row[0] === ORG_TABLE_SEPARATOR)
   );
+
   const colCount = Math.max(...dataRows.map(r => r.length), 0);
   const colWidths = Array(colCount).fill(0);
+
   for (const row of dataRows) {
     for (let c = 0; c < colCount; c++) {
       colWidths[c] = Math.max(colWidths[c], getDisplayWidth(row[c] || ''));
