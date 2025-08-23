@@ -1,15 +1,16 @@
 import { ORG_TABLE_SEPARATOR } from './constants';
 
-// Cell index utility
 export function getCellIndexAtPosition(
   lineText: string,
   character: number
 ): number {
   const cellMatches = [...lineText.matchAll(/\|/g)];
   let cellIdx = 0;
+
   for (let i = 0; i < cellMatches.length - 1; i++) {
     const start = cellMatches[i].index ?? 0;
     const end = cellMatches[i + 1].index ?? 0;
+
     if (character >= start && character < end) {
       cellIdx = i;
       break;
