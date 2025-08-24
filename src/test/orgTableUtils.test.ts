@@ -117,3 +117,11 @@ suite('splitTableRows', () => {
     ]);
   });
 });
+
+suite('getDisplayWidth', () => {
+  test('calculates display width correctly', () => {
+    assert.strictEqual(orgTableUtils.getDisplayWidth('a'), 1);
+    assert.strictEqual(orgTableUtils.getDisplayWidth('あ'), 2);
+    assert.strictEqual(orgTableUtils.getDisplayWidth('aあ'), 3);
+  });
+});

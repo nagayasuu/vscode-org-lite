@@ -71,9 +71,9 @@ export function splitTableRows(tableLines: string[]): string[][] {
   });
 }
 
-// Display width calculation function (full-width: 2, half-width: 1)
 export function getDisplayWidth(str: string): number {
   let width = 0;
+
   for (const ch of str) {
     width +=
       /[\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF01-\uFF60\uFFE0-\uFFE6\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/.test(
