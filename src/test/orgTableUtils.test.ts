@@ -125,3 +125,12 @@ suite('getDisplayWidth', () => {
     assert.strictEqual(orgTableUtils.getDisplayWidth('aあ'), 3);
   });
 });
+
+suite('formatSeparatorLine', () => {
+  test('formats separator line correctly', () => {
+    assert.strictEqual(
+      orgTableUtils.formatSeparatorLine([1, 2, 3], '  '),
+      '  |---+----+-----|'
+    );
+  });
+});

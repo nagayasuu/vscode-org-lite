@@ -85,7 +85,6 @@ export function getDisplayWidth(str: string): number {
   return width;
 }
 
-// Format separator line (with indentation support)
 export function formatSeparatorLine(
   colWidths: number[],
   indent: string = ''
