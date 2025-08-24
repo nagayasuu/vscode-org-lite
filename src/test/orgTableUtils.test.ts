@@ -49,3 +49,14 @@ suite('calcColWidths', () => {
     );
   });
 });
+
+suite('isSeparatorLine', () => {
+  test('returns true for separator lines', () => {
+    assert.strictEqual(orgTableUtils.isSeparatorLine('|---|---|'), true);
+  });
+
+  test('returns false for non-separator lines', () => {
+    assert.strictEqual(orgTableUtils.isSeparatorLine('|a|b|'), false);
+    assert.strictEqual(orgTableUtils.isSeparatorLine('|---|b|'), false);
+  });
+});

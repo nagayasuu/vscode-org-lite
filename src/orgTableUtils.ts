@@ -41,7 +41,6 @@ export function calcColWidths(rows: string[][]): number[] {
   return colWidths;
 }
 
-// Separator line detection
 export function isSeparatorLine(text: string): boolean {
   // Lines starting with "|-", or lines composed only of "|", "-", and "+"
   return /^\|[-+| ]*$/.test(text.trim()) && text.includes('-');
