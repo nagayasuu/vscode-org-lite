@@ -51,6 +51,15 @@ export function isTableLine(text: string): boolean {
   return /^[ \t]*\|.*/.test(text);
 }
 
+export function splitTableLineToCells(line: string): string[] {
+  let cells = line.trim().split(/\s*\|\s*/);
+
+  if (cells.length > 0 && cells[0] === '') cells.shift();
+  if (cells.length > 0 && cells[cells.length - 1] === '') cells.pop();
+
+  return cells;
+}
+
 // Split table rows into cells
 export function splitTableRows(tableLines: string[]): string[][] {
   return tableLines.map(line => {
@@ -61,14 +70,6 @@ export function splitTableRows(tableLines: string[]): string[][] {
     // Treat empty cells as empty elements, but exclude leading/trailing empty elements
     return splitTableLineToCells(line);
   });
-}
-
-// Helper: Split a table line into cells, excluding leading/trailing empty elements
-export function splitTableLineToCells(line: string): string[] {
-  let cells = line.trim().split(/\s*\|\s*/);
-  if (cells.length > 0 && cells[0] === '') cells.shift();
-  if (cells.length > 0 && cells[cells.length - 1] === '') cells.pop();
-  return cells;
 }
 
 // Display width calculation function (full-width: 2, half-width: 1)

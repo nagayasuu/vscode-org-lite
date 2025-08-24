@@ -73,3 +73,24 @@ suite('isTableLine', () => {
     assert.strictEqual(orgTableUtils.isTableLine('test'), false);
   });
 });
+
+suite('splitTableLineToCells', () => {
+  test('splits table line into cells correctly', () => {
+    assert.deepStrictEqual(orgTableUtils.splitTableLineToCells('|a|b|c|'), [
+      'a',
+      'b',
+      'c',
+    ]);
+
+    assert.deepStrictEqual(
+      orgTableUtils.splitTableLineToCells('|   |   |   |'),
+      ['', '', '']
+    );
+
+    assert.deepStrictEqual(orgTableUtils.splitTableLineToCells('|a|b|c|   '), [
+      'a',
+      'b',
+      'c',
+    ]);
+  });
+});
