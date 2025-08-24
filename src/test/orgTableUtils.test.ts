@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import { ORG_TABLE_SEPARATOR } from '../constants';
 import * as orgTableUtils from '../orgTableUtils';
 
 suite('getCellIndexAtPosition', () => {
@@ -91,6 +92,28 @@ suite('splitTableLineToCells', () => {
       'a',
       'b',
       'c',
+    ]);
+  });
+});
+
+suite('splitTableRows', () => {
+  test('splits table rows into cells correctly', () => {
+    assert.deepStrictEqual(orgTableUtils.splitTableRows(['|a|b|c|']), [
+      ['a', 'b', 'c'],
+    ]);
+
+    assert.deepStrictEqual(orgTableUtils.splitTableRows(['|   |   |   |']), [
+      ['', '', ''],
+    ]);
+
+    assert.deepStrictEqual(orgTableUtils.splitTableRows(['|a|b|c|   ']), [
+      ['a', 'b', 'c'],
+    ]);
+  });
+
+  test('separator lines are recognized', () => {
+    assert.deepStrictEqual(orgTableUtils.splitTableRows(['|---|---|']), [
+      [ORG_TABLE_SEPARATOR],
     ]);
   });
 });

@@ -60,7 +60,6 @@ export function splitTableLineToCells(line: string): string[] {
   return cells;
 }
 
-// Split table rows into cells
 export function splitTableRows(tableLines: string[]): string[][] {
   return tableLines.map(line => {
     if (isSeparatorLine(line)) {
