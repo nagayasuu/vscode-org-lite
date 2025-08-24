@@ -46,7 +46,6 @@ export function isSeparatorLine(text: string): boolean {
   return /^\|[-+| ]*$/.test(text.trim()) && text.includes('-');
 }
 
-// Table line detection function (any string starting with '|')
 export function isTableLine(text: string): boolean {
   // Allow leading indentation (spaces or tabs), and consider a line as a table line if it starts with a '|'
   return /^[ \t]*\|.*/.test(text);

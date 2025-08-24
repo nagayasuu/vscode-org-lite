@@ -60,3 +60,16 @@ suite('isSeparatorLine', () => {
     assert.strictEqual(orgTableUtils.isSeparatorLine('|---|b|'), false);
   });
 });
+
+suite('isTableLine', () => {
+  test('returns true for table lines', () => {
+    assert.strictEqual(orgTableUtils.isTableLine('|---|---|'), true);
+    assert.strictEqual(orgTableUtils.isTableLine('|   |   |'), true);
+    assert.strictEqual(orgTableUtils.isTableLine('  |test|test|'), true);
+  });
+
+  test('returns false for non-table lines', () => {
+    assert.strictEqual(orgTableUtils.isTableLine('a|b|'), false);
+    assert.strictEqual(orgTableUtils.isTableLine('test'), false);
+  });
+});
