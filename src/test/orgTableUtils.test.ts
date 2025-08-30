@@ -143,3 +143,12 @@ suite('formatEmptyRow', () => {
     );
   });
 });
+
+suite('formatTableRow', () => {
+  test('formats table row correctly', () => {
+    assert.strictEqual(
+      orgTableUtils.formatTableRow(['a', 'b', 'c'], [1, 1, 1]),
+      '| a | b | c |'
+    );
+  });
+});

@@ -99,7 +99,6 @@ export function formatEmptyRow(
   return indent + '| ' + colWidths.map(w => ' '.repeat(w)).join(' | ') + ' |';
 }
 
-// Format table row
 export function formatTableRow(row: string[], colWidths: number[]): string {
   return (
     '| ' +
