@@ -444,3 +444,67 @@ suite('getColWidthsFromTableLines', () => {
     );
   });
 });
+
+suite('formatTableRowsWithIndents', () => {
+  test('formats table rows with indents correctly', () => {
+    const rows = [['a', 'b', 'c'], [ORG_TABLE_SEPARATOR], ['d', 'e', 'f']];
+    const colWidths = [1, 1, 1];
+    const indents = ['  ', '  ', '    '];
+    const expected = [
+      '  | a | b | c |',
+      '  |---+---+---|',
+      '    | d | e | f |',
+    ];
+    assert.deepStrictEqual(
+      orgTableUtils.formatTableRowsWithIndents(rows, colWidths, indents),
+      expected
+    );
+  });
+
+  test('handles empty indents array', () => {
+    const rows = [['a', 'b'], [ORG_TABLE_SEPARATOR], ['c', 'd']];
+    const colWidths = [1, 1];
+    const indents: string[] = [];
+    const expected = ['| a | b |', '|---+---|', '| c | d |'];
+    assert.deepStrictEqual(
+      orgTableUtils.formatTableRowsWithIndents(rows, colWidths, indents),
+      expected
+    );
+  });
+
+  test('handles all separator rows', () => {
+    const rows = [[ORG_TABLE_SEPARATOR], [ORG_TABLE_SEPARATOR]];
+    const colWidths = [2, 2];
+    const indents = [' ', '  '];
+    const expected = [' |----+----|', '  |----+----|'];
+    assert.deepStrictEqual(
+      orgTableUtils.formatTableRowsWithIndents(rows, colWidths, indents),
+      expected
+    );
+  });
+
+  test('handles empty rows', () => {
+    const rows: string[][] = [];
+    const colWidths: number[] = [];
+    const indents: string[] = [];
+    const expected: string[] = [];
+    assert.deepStrictEqual(
+      orgTableUtils.formatTableRowsWithIndents(rows, colWidths, indents),
+      expected
+    );
+  });
+
+  test('handles rows with missing indents', () => {
+    const rows = [
+      ['a', 'b'],
+      ['c', 'd'],
+    ];
+    const colWidths = [1, 1];
+    const indents = ['  '];
+    const expected = ['  | a | b |', '| c | d |'];
+    assert.deepStrictEqual(
+      orgTableUtils.formatTableRowsWithIndents(rows, colWidths, indents),
+      expected
+    );
+  });
+});
