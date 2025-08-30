@@ -411,3 +411,36 @@ suite('getNextCellPositionInfo', () => {
     );
   });
 });
+
+suite('getColWidthsFromTableLines', () => {
+  test('calculates column widths correctly', () => {
+    const input = ['| a | b | c |', '|---+---+---|', '| d | e | f |'];
+    const expected = [1, 1, 1];
+    assert.deepStrictEqual(
+      orgTableUtils.getColWidthsFromTableLines(input),
+      expected
+    );
+  });
+
+  test('handles empty table', () => {
+    const input: string[] = [];
+    const expected = [3, 3];
+    assert.deepStrictEqual(
+      orgTableUtils.getColWidthsFromTableLines(input),
+      expected
+    );
+  });
+
+  test('handles table with varying column widths', () => {
+    const input = [
+      '| a | bb | ccc |',
+      '|---+----+-----|',
+      '| d | eee | ffff |',
+    ];
+    const expected = [1, 3, 4];
+    assert.deepStrictEqual(
+      orgTableUtils.getColWidthsFromTableLines(input),
+      expected
+    );
+  });
+});
