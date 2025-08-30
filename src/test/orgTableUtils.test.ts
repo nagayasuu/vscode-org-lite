@@ -16,6 +16,15 @@ suite('getCellIndexAtPosition', () => {
       1
     );
   });
+
+  test('returns correct cell index when line does not start with "|" (cellMatches[i].index is 0 by fallback)', () => {
+    // No "|" at index 0, so fallback to 0
+    assert.strictEqual(orgTableUtils.getCellIndexAtPosition('a|b|c|', 0), 0);
+    assert.strictEqual(orgTableUtils.getCellIndexAtPosition('a|b|c|', 1), 0);
+    assert.strictEqual(orgTableUtils.getCellIndexAtPosition('a|b|c|', 2), 0);
+    // After first "|", should be cell 1
+    assert.strictEqual(orgTableUtils.getCellIndexAtPosition('a|b|c|', 3), 1);
+  });
 });
 
 suite('getIndent', () => {
