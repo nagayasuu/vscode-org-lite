@@ -284,3 +284,72 @@ suite('getPrevCellPositionInfo', () => {
     );
   });
 });
+
+suite('getNextCellPositionInfo', () => {
+  test('gets next cell position info correctly', () => {
+    const input = ['| a | b | c |', '| d | e | f |'];
+    const expected = { line: 0, offset: 10 };
+    assert.deepStrictEqual(
+      orgTableUtils.getNextCellPositionInfo(input, 0, 5, 0, 1),
+      expected
+    );
+  });
+
+  test('moves to next cell in the same row', () => {
+    const input = ['| a | b | c |'];
+    // Cursor at start of first cell
+    const expected = { line: 0, offset: 6 };
+    assert.deepStrictEqual(
+      orgTableUtils.getNextCellPositionInfo(input, 0, 2, 0, 0),
+      expected
+    );
+  });
+
+  test('moves to next row if at last cell', () => {
+    const input = ['| a | b | c |', '| d | e | f |'];
+    // Cursor at end of first row (after last cell)
+    const expected = { line: 1, offset: 2 };
+    assert.deepStrictEqual(
+      orgTableUtils.getNextCellPositionInfo(input, 0, input[0].length, 0, 1),
+      expected
+    );
+  });
+
+  test('skips separator line when moving to next row', () => {
+    const input = ['| a | b | c |', '|---+---+---|', '| d | e | f |'];
+    // Cursor at end of first row (after last cell)
+    const expected = { line: 2, offset: 2 };
+    assert.deepStrictEqual(
+      orgTableUtils.getNextCellPositionInfo(input, 0, input[0].length, 0, 2),
+      expected
+    );
+  });
+
+  test('returns null if at last cell of last row', () => {
+    const input = ['| a | b | c |', '| d | e | f |'];
+    // Cursor at end of last row
+    assert.strictEqual(
+      orgTableUtils.getNextCellPositionInfo(input, 1, input[1].length, 0, 1),
+      null
+    );
+  });
+
+  test('returns null if next row does not have a cell', () => {
+    const input = ['| a | b | c |', 'not a table row'];
+    // Cursor at end of first row
+    assert.strictEqual(
+      orgTableUtils.getNextCellPositionInfo(input, 0, input[0].length, 0, 1),
+      null
+    );
+  });
+
+  test('moves to next cell in the same row when charPos is at cell boundary', () => {
+    const input = ['| a | b | c |'];
+    // Cursor at the start of second cell
+    const expected = { line: 0, offset: 10 };
+    assert.deepStrictEqual(
+      orgTableUtils.getNextCellPositionInfo(input, 0, 6, 0, 0),
+      expected
+    );
+  });
+});
