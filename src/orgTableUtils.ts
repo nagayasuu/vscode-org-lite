@@ -159,17 +159,21 @@ export function removeColumnFromRows(
   });
 }
 
-// Pad all data rows to the maximum number of columns (pure function)
 export function padRowsToMaxCols(rows: string[][]): string[][] {
   const dataRows = rows.filter(
     r => !(r.length === 1 && r[0] === ORG_TABLE_SEPARATOR)
   );
+
   const maxCols =
     dataRows.length === 0 ? 0 : Math.max(...dataRows.map(r => r.length));
+
   return rows.map(row => {
     if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) return [...row];
+
     const newRow = [...row];
+
     while (newRow.length < maxCols) newRow.push('');
+
     return newRow;
   });
 }

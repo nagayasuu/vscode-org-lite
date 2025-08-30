@@ -221,3 +221,29 @@ suite('removeColumnFromRows', () => {
     );
   });
 });
+
+suite('padRowsToMaxCols', () => {
+  test('pads rows to the maximum number of columns', () => {
+    const input = [
+      ['a', 'b'],
+      ['c', 'd', 'e'],
+    ];
+    const expected = [
+      ['a', 'b', ''],
+      ['c', 'd', 'e'],
+    ];
+    assert.deepStrictEqual(orgTableUtils.padRowsToMaxCols(input), expected);
+  });
+
+  test('handles empty rows', () => {
+    const input = [[]];
+    const expected = [[]];
+    assert.deepStrictEqual(orgTableUtils.padRowsToMaxCols(input), expected);
+  });
+
+  test('handles separator rows', () => {
+    const input = [[ORG_TABLE_SEPARATOR]];
+    const expected = [[ORG_TABLE_SEPARATOR]];
+    assert.deepStrictEqual(orgTableUtils.padRowsToMaxCols(input), expected);
+  });
+});
