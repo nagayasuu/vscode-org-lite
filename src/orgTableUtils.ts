@@ -113,7 +113,6 @@ export function formatTableRow(row: string[], colWidths: number[]): string {
   );
 }
 
-// New utility function: getCellOffsetInRow
 export function getCellOffsetInRow(rowText: string, cellIdx: number): number {
   const cellMatches = [...rowText.matchAll(/\|/g)];
 
