@@ -186,3 +186,38 @@ suite('addColumnToTableRows', () => {
     assert.deepStrictEqual(orgTableUtils.addColumnToTableRows(input), expected);
   });
 });
+
+suite('removeColumnFromRows', () => {
+  test('removes a column from all rows', () => {
+    const input = [
+      ['a', 'b', 'c'],
+      ['d', 'e', 'f'],
+    ];
+    const expected = [
+      ['a', 'c'],
+      ['d', 'f'],
+    ];
+    assert.deepStrictEqual(
+      orgTableUtils.removeColumnFromRows(input, 1),
+      expected
+    );
+  });
+
+  test('handles empty rows', () => {
+    const input = [[]];
+    const expected = [[]];
+    assert.deepStrictEqual(
+      orgTableUtils.removeColumnFromRows(input, 0),
+      expected
+    );
+  });
+
+  test('handles separator rows', () => {
+    const input = [[ORG_TABLE_SEPARATOR]];
+    const expected = [[ORG_TABLE_SEPARATOR]];
+    assert.deepStrictEqual(
+      orgTableUtils.removeColumnFromRows(input, 0),
+      expected
+    );
+  });
+});

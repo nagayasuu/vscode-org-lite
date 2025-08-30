@@ -142,17 +142,19 @@ export function addColumnToTableRows(rows: string[][]): string[][] {
   });
 }
 
-// Remove a column (cellIdx) from all data rows (pure function)
 export function removeColumnFromRows(
   rows: string[][],
   cellIdx: number
 ): string[][] {
   return rows.map(row => {
     if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) return [...row];
+
     const newRow = [...row];
+
     if (cellIdx >= 0 && cellIdx < newRow.length) {
       newRow.splice(cellIdx, 1);
     }
+
     return newRow;
   });
 }
