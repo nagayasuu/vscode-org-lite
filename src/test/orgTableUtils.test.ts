@@ -283,6 +283,64 @@ suite('getPrevCellPositionInfo', () => {
       expected
     );
   });
+
+  test('moves to previous cell in the same row', () => {
+    const input = ['| a | b | c |', '| d | e | f |'];
+    // Cursor at start of third cell in second row
+    const expected = { line: 1, offset: 6 };
+    assert.deepStrictEqual(
+      orgTableUtils.getPrevCellPositionInfo(input, 1, 10, 0),
+      expected
+    );
+  });
+
+  test('moves to previous row if at first cell', () => {
+    const input = ['| a | b | c |', '| d | e | f |'];
+    // Cursor at start of first cell in second row
+    const expected = { line: 0, offset: 10 };
+    assert.deepStrictEqual(
+      orgTableUtils.getPrevCellPositionInfo(input, 1, 2, 0),
+      expected
+    );
+  });
+
+  test('skips separator lines when moving to previous row', () => {
+    const input = ['| a | b | c |', '|---+---+---|', '| d | e | f |'];
+    // Cursor at start of first cell in third row
+    const expected = { line: 0, offset: 10 };
+    assert.deepStrictEqual(
+      orgTableUtils.getPrevCellPositionInfo(input, 2, 2, 0),
+      expected
+    );
+  });
+
+  test('returns null if at first cell of first row', () => {
+    const input = ['| a | b | c |', '| d | e | f |'];
+    // Cursor at start of first cell in first row
+    assert.strictEqual(
+      orgTableUtils.getPrevCellPositionInfo(input, 0, 2, 0),
+      null
+    );
+  });
+
+  test('returns null if current cell index is 0 and currentLine == startLine', () => {
+    const input = ['| a | b | c |', '| d | e | f |'];
+    // Cursor at start of first cell in first row, startLine is 0
+    assert.strictEqual(
+      orgTableUtils.getPrevCellPositionInfo(input, 0, 2, 0),
+      null
+    );
+  });
+
+  test('moves to previous cell in the same row when charPos is at cell boundary', () => {
+    const input = ['| a | b | c |'];
+    // Cursor at start of third cell
+    const expected = { line: 0, offset: 6 };
+    assert.deepStrictEqual(
+      orgTableUtils.getPrevCellPositionInfo(input, 0, 10, 0),
+      expected
+    );
+  });
 });
 
 suite('getNextCellPositionInfo', () => {
