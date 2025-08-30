@@ -247,3 +247,29 @@ suite('padRowsToMaxCols', () => {
     assert.deepStrictEqual(orgTableUtils.padRowsToMaxCols(input), expected);
   });
 });
+
+suite('swapColumns', () => {
+  test('swaps columns correctly', () => {
+    const input = [
+      ['a', 'b', 'c'],
+      ['d', 'e', 'f'],
+    ];
+    const expected = [
+      ['c', 'b', 'a'],
+      ['f', 'e', 'd'],
+    ];
+    assert.deepStrictEqual(orgTableUtils.swapColumns(input, 0, 2), expected);
+  });
+
+  test('handles empty rows', () => {
+    const input = [[]];
+    const expected = [[]];
+    assert.deepStrictEqual(orgTableUtils.swapColumns(input, 0, 1), expected);
+  });
+
+  test('handles separator rows', () => {
+    const input = [[ORG_TABLE_SEPARATOR]];
+    const expected = [[ORG_TABLE_SEPARATOR]];
+    assert.deepStrictEqual(orgTableUtils.swapColumns(input, 0, 1), expected);
+  });
+});

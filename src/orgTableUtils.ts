@@ -178,16 +178,18 @@ export function padRowsToMaxCols(rows: string[][]): string[][] {
   });
 }
 
-// Swap two columns (fromIdx, toIdx) across all data rows (pure function)
 export function swapColumns(
   rows: string[][],
   fromIdx: number,
   toIdx: number
 ): string[][] {
   if (fromIdx === toIdx) return rows.map(r => [...r]);
+
   return rows.map(row => {
     if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) return [...row];
+
     const newRow = [...row];
+
     if (
       fromIdx >= 0 &&
       toIdx >= 0 &&
@@ -198,6 +200,7 @@ export function swapColumns(
       newRow[fromIdx] = newRow[toIdx];
       newRow[toIdx] = tmp;
     }
+
     return newRow;
   });
 }
