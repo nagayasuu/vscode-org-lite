@@ -160,3 +160,29 @@ suite('getCellOffsetInRow', () => {
     assert.strictEqual(orgTableUtils.getCellOffsetInRow('| a | b |', 13), 2);
   });
 });
+
+suite('addColumnToTableRows', () => {
+  test('adds a new column to all rows', () => {
+    const input = [
+      ['a', 'b'],
+      ['c', 'd'],
+    ];
+    const expected = [
+      ['a', 'b', ''],
+      ['c', 'd', ''],
+    ];
+    assert.deepStrictEqual(orgTableUtils.addColumnToTableRows(input), expected);
+  });
+
+  test('handles empty rows', () => {
+    const input = [[]];
+    const expected = [['']];
+    assert.deepStrictEqual(orgTableUtils.addColumnToTableRows(input), expected);
+  });
+
+  test('handles separator rows', () => {
+    const input = [[ORG_TABLE_SEPARATOR]];
+    const expected = [[ORG_TABLE_SEPARATOR]];
+    assert.deepStrictEqual(orgTableUtils.addColumnToTableRows(input), expected);
+  });
+});
