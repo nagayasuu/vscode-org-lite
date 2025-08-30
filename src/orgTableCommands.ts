@@ -4,27 +4,36 @@ import * as orgTableUtils from './orgTableUtils';
 
 export async function deleteTableColumn() {
   const editor = vscode.window.activeTextEditor;
+
   if (!editor || editor.document.languageId !== 'org') {
     return;
   }
+
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
+
   if (!orgTableUtils.isTableLine(lineText)) return;
+
   const { startLine, endLine } = detectTableRange(editor, pos.line);
   const tableLines = getTableLines(editor, startLine, endLine);
   const rows = orgTableUtils.splitTableRows(tableLines);
+
   // Determine the current cell index
   const cellIdx = orgTableUtils.getCellIndexAtPosition(lineText, pos.character);
+
   // Remove the column at cellIdx from all rows (pure)
   const newRows = orgTableUtils.removeColumnFromRows(rows, cellIdx);
+
   // Reformat (handle last column deletion simply)
   const colWidths = orgTableUtils.calcColWidths(newRows);
+
   if (colWidths.length === 0) {
     // If all data rows are empty, delete all lines in the table range
     const allEmpty = newRows.every(
       row =>
         row.length === 0 || (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR)
     );
+
     if (allEmpty) {
       await editor.edit(editBuilder => {
         for (let i = startLine; i <= endLine; i++) {
@@ -34,7 +43,9 @@ export async function deleteTableColumn() {
     }
     return;
   }
+
   await formatTable(editor, startLine, endLine, newRows, colWidths);
+
   // Move the cursor to the start of the same row, same column (or previous column if at end)
   const newLine = pos.line;
   const newRowText = editor.document.lineAt(newLine).text;
@@ -49,25 +60,32 @@ export async function deleteTableColumn() {
 
 export async function formatOrgTable() {
   const editor = vscode.window.activeTextEditor;
+
   if (!editor || editor.document.languageId !== 'org') {
     return;
   }
+
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
+
   if (!orgTableUtils.isTableLine(lineText)) return;
+
   const { startLine, endLine } = detectTableRange(editor, pos.line);
   const tableLines = getTableLines(editor, startLine, endLine);
   const rows = orgTableUtils.splitTableRows(tableLines);
   const colWidths = orgTableUtils.calcColWidths(rows);
+
   await formatTable(editor, startLine, endLine, rows, colWidths);
 
   // Add an empty row to the next line and move the cursor to the first cell
   const indent = orgTableUtils.getIndent(editor.document.lineAt(endLine).text);
   const emptyRow = orgTableUtils.formatEmptyRow(colWidths, indent);
   const lastLine = editor.document.lineAt(endLine).range.end;
+
   await editor.edit(editBuilder => {
     editBuilder.insert(lastLine, '\n' + emptyRow);
   });
+
   // Move the cursor to the first cell of the added row
   const firstCellIdx = emptyRow.indexOf('| ') + 2;
   const newPos = new vscode.Position(endLine + 1, firstCellIdx);
@@ -76,37 +94,50 @@ export async function formatOrgTable() {
 
 export async function moveTableColumn(direction: number) {
   const editor = vscode.window.activeTextEditor;
+
   if (!editor || editor.document.languageId !== 'org') {
     return;
   }
+
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
+
   if (!orgTableUtils.isTableLine(lineText)) return;
+
   const { startLine, endLine } = detectTableRange(editor, pos.line);
   const tableLines = getTableLines(editor, startLine, endLine);
   const rows = orgTableUtils.splitTableRows(tableLines);
+
   // Determine the current cell index
   const cellIdx = orgTableUtils.getCellIndexAtPosition(lineText, pos.character);
+
   // Normalize rows to same column count (pure)
   const paddedRows = orgTableUtils.padRowsToMaxCols(rows);
+
   // Determine maxCols for boundary checks
   const maxCols = Math.max(
     ...paddedRows
       .filter(r => !(r.length === 1 && r[0] === ORG_TABLE_SEPARATOR))
       .map(r => r.length)
   );
+
   // Check for left/right edge
   if (direction === -1 && cellIdx <= 0) return;
+
   if (direction === 1 && cellIdx >= maxCols - 1) return;
+
   // Swap columns (pure)
   const swappedRows = orgTableUtils.swapColumns(
     paddedRows,
     cellIdx,
     cellIdx + direction
   );
+
   // Reformat
   const colWidths = orgTableUtils.calcColWidths(swappedRows);
+
   await formatTable(editor, startLine, endLine, swappedRows, colWidths);
+
   // Move the cursor
   const newLine = pos.line;
   const newRowText = editor.document.lineAt(newLine).text;
@@ -119,15 +150,20 @@ export async function moveTableColumn(direction: number) {
 
 export async function onTableEnter() {
   const editor = vscode.window.activeTextEditor;
+
   if (!editor || editor.document.languageId !== 'org') {
     return;
   }
+
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
   const tableLine = orgTableUtils.isTableLine(lineText);
+
   if (!tableLine) return;
+
   const { startLine, endLine } = detectTableRange(editor, pos.line);
   const isHeader = pos.line === startLine;
+
   if (isHeader) {
     await insertColumn(editor, startLine, endLine);
 
@@ -140,21 +176,26 @@ export async function onTableEnter() {
     const tableLines = getTableLines(editor, startLine, endLine);
     const rows = orgTableUtils.splitTableRows(tableLines);
     const colWidths = orgTableUtils.calcColWidths(rows);
+
     await formatTable(editor, startLine, endLine, rows, colWidths);
+
     // Move vertically to the cell below, or add a new row if at the last row
     if (pos.line === endLine) {
       // Add a new empty row and move the cursor to the beginning of the same column
       const indent = orgTableUtils.getIndent(lineText);
       const emptyRow = orgTableUtils.formatEmptyRow(colWidths, indent);
+
       await editor.edit(editBuilder => {
         const lastLine = editor.document.lineAt(endLine).range.end;
         editBuilder.insert(lastLine, '\n' + emptyRow);
       });
+
       // Calculate the current cell position
       const cellIdx = orgTableUtils.getCellIndexAtPosition(
         lineText,
         pos.character
       );
+
       // Move the cursor to the beginning of the same cell in the new row (consider indentation)
       const newRowText = emptyRow;
       const offset = orgTableUtils.getCellOffsetInRow(newRowText, cellIdx);
@@ -167,6 +208,7 @@ export async function onTableEnter() {
         pos.character
       );
       const nextCellMatches = [...nextRowText.matchAll(/\|/g)];
+
       if (cellIdx < nextCellMatches.length - 1) {
         const offset = orgTableUtils.getCellOffsetInRow(nextRowText, cellIdx);
         const newPos = new vscode.Position(pos.line + 1, offset);
@@ -178,20 +220,26 @@ export async function onTableEnter() {
 
 export async function moveToPrevTableCell() {
   const editor = vscode.window.activeTextEditor;
+
   if (!editor || editor.document.languageId !== 'org') {
     return;
   }
+
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
   const tableLine = orgTableUtils.isTableLine(lineText);
+
   if (tableLine) {
     const { startLine, endLine } = detectTableRange(editor, pos.line);
     const tableLines = getTableLines(editor, startLine, endLine);
     const rows = orgTableUtils.splitTableRows(tableLines);
     const colWidths = orgTableUtils.calcColWidths(rows);
+
     // Always reformat the table before moving the cursor
     await formatTable(editor, startLine, endLine, rows, colWidths);
+
     const prevCellPos = getPrevCellPosition(editor, pos, startLine, endLine);
+
     if (prevCellPos) {
       editor.selection = new vscode.Selection(prevCellPos, prevCellPos);
     }
@@ -200,13 +248,17 @@ export async function moveToPrevTableCell() {
 
 export async function moveToNextTableCell() {
   const editor = vscode.window.activeTextEditor;
+
   if (!editor || editor.document.languageId !== 'org') {
     return;
   }
+
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
+
   // Use table line detection function
   const tableLine = orgTableUtils.isTableLine(lineText);
+
   if (tableLine) {
     // Table formatting process
     const { startLine, endLine } = detectTableRange(editor, pos.line);
@@ -238,6 +290,7 @@ export async function moveToNextTableCell() {
 
     if (nextCellPos) {
       let nextLine = nextCellPos.line;
+
       // If the destination is a separator line, move to the first cell of the next line
       if (
         nextLine < editor.document.lineCount &&
@@ -247,6 +300,7 @@ export async function moveToNextTableCell() {
         if (nextLine + 1 < editor.document.lineCount) {
           const afterSepLine = editor.document.lineAt(nextLine + 1).text;
           const firstCell = afterSepLine.indexOf('| ');
+
           if (firstCell !== -1) {
             nextCellPos = new vscode.Position(nextLine + 1, firstCell + 2);
           } else {
@@ -260,6 +314,7 @@ export async function moveToNextTableCell() {
     }
 
     await insertEmptyRow(editor, endLine, colWidths);
+
     // Move the cursor precisely to just after the "| " of the newly added empty row (the beginning of the first cell, considering indentation)
     const origLine = editor.document.lineAt(pos.line).text;
     const indent = orgTableUtils.getIndent(origLine);
@@ -273,26 +328,32 @@ export async function moveToNextTableCell() {
 // orgTableLineFocus context key management function
 export function updateOrgTableLineFocus() {
   const editor = vscode.window.activeTextEditor;
+
   if (!editor || editor.document.languageId !== 'org') {
     vscode.commands.executeCommand('setContext', 'orgTableLineFocus', false);
     return;
   }
+
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
   const isTable = orgTableUtils.isTableLine(lineText);
   let isTableLineFocus = isTable;
+
   // If the next or previous line is also a table line, set to false
   if (isTable) {
     // Check next line
     if (pos.line + 1 < editor.document.lineCount) {
       const nextLineText = editor.document.lineAt(pos.line + 1).text;
+
       if (orgTableUtils.isTableLine(nextLineText)) {
         isTableLineFocus = false;
       }
     }
+
     // Check previous line
     if (pos.line - 1 >= 0) {
       const prevLineText = editor.document.lineAt(pos.line - 1).text;
+
       if (orgTableUtils.isTableLine(prevLineText)) {
         isTableLineFocus = false;
       }
@@ -308,18 +369,22 @@ export function updateOrgTableLineFocus() {
 // orgTableCellFocus context key management function
 export function updateOrgTableCellFocus() {
   const editor = vscode.window.activeTextEditor;
+
   if (!editor || editor.document.languageId !== 'org') {
     vscode.commands.executeCommand('setContext', 'orgTableCellFocus', false);
     return;
   }
+
   const pos = editor.selection.active;
   const lineText = editor.document.lineAt(pos.line).text;
   const tableLine = orgTableUtils.isTableLine(lineText);
   let focus = false;
+
   if (tableLine) {
     // Inside table: when the cursor is between the first and last '|'
     const firstBar = lineText.indexOf('|');
     const lastBar = lineText.lastIndexOf('|');
+
     if (
       firstBar !== -1 &&
       lastBar !== -1 &&
@@ -414,7 +479,6 @@ function getNextCellPosition(
   return null;
 }
 
-// Function to get the latest column widths of the current table range
 function getLatestColWidths(editor: vscode.TextEditor, line: number): number[] {
   let startLine = line,
     endLine = line;
@@ -453,11 +517,14 @@ async function insertSeparatorLine(
 ) {
   // Always get the latest column widths
   const latestColWidths = getLatestColWidths(editor, line);
+
   // Always get indentation using getIndent
   const origLine = editor.document.lineAt(line).text;
+
   const indent = orgTableUtils.getIndent(origLine);
   const sep = orgTableUtils.formatSeparatorLine(latestColWidths, indent);
   const emptyRow = orgTableUtils.formatEmptyRow(latestColWidths, indent);
+
   await editor.edit(editBuilder => {
     editBuilder.replace(editor.document.lineAt(line).range, sep);
     // Insert empty row below
@@ -496,7 +563,6 @@ async function formatTable(
   });
 }
 
-// Insert an empty row below the table
 async function insertEmptyRow(
   editor: vscode.TextEditor,
   endLine: number,
@@ -504,11 +570,14 @@ async function insertEmptyRow(
 ) {
   // Always get the latest column widths
   const latestColWidths = getLatestColWidths(editor, endLine);
+
   // Always get indentation using getIndent
   const origLine = editor.document.lineAt(endLine).text;
+
   const indent = orgTableUtils.getIndent(origLine);
   const emptyRow = orgTableUtils.formatEmptyRow(latestColWidths, indent);
   const lastLine = editor.document.lineAt(endLine).range.end;
+
   await editor.edit(editBuilder => {
     editBuilder.insert(lastLine, '\n' + emptyRow);
   });
@@ -527,7 +596,6 @@ function detectTableRange(
   return orgTableUtils.detectTableRangeFromLines(lines, line);
 }
 
-// Get table lines in range
 function getTableLines(
   editor: vscode.TextEditor,
   startLine: number,

@@ -1,15 +1,16 @@
 import { ORG_TABLE_SEPARATOR } from './constants';
 
-// Cell index utility
 export function getCellIndexAtPosition(
   lineText: string,
   character: number
 ): number {
   const cellMatches = [...lineText.matchAll(/\|/g)];
   let cellIdx = 0;
+
   for (let i = 0; i < cellMatches.length - 1; i++) {
     const start = cellMatches[i].index ?? 0;
     const end = cellMatches[i + 1].index ?? 0;
+
     if (character >= start && character < end) {
       cellIdx = i;
       break;
@@ -18,20 +19,20 @@ export function getCellIndexAtPosition(
   return cellIdx;
 }
 
-// Indentation utility
 export function getIndent(text: string): string {
   const m = text.match(/^([ \t]*)/);
   return m ? m[1] : '';
 }
 
-// Calculate column widths
 export function calcColWidths(rows: string[][]): number[] {
   // Exclude separator rows ([ORG_TABLE_SEPARATOR]) from width calculation
   const dataRows = rows.filter(
     row => !(row.length === 1 && row[0] === ORG_TABLE_SEPARATOR)
   );
+
   const colCount = Math.max(...dataRows.map(r => r.length), 0);
   const colWidths = Array(colCount).fill(0);
+
   for (const row of dataRows) {
     for (let c = 0; c < colCount; c++) {
       colWidths[c] = Math.max(colWidths[c], getDisplayWidth(row[c] || ''));
@@ -40,19 +41,25 @@ export function calcColWidths(rows: string[][]): number[] {
   return colWidths;
 }
 
-// Separator line detection
 export function isSeparatorLine(text: string): boolean {
   // Lines starting with "|-", or lines composed only of "|", "-", and "+"
   return /^\|[-+| ]*$/.test(text.trim()) && text.includes('-');
 }
 
-// Table line detection function (any string starting with '|')
 export function isTableLine(text: string): boolean {
   // Allow leading indentation (spaces or tabs), and consider a line as a table line if it starts with a '|'
   return /^[ \t]*\|.*/.test(text);
 }
 
-// Split table rows into cells
+export function splitTableLineToCells(line: string): string[] {
+  let cells = line.trim().split(/\s*\|\s*/);
+
+  if (cells.length > 0 && cells[0] === '') cells.shift();
+  if (cells.length > 0 && cells[cells.length - 1] === '') cells.pop();
+
+  return cells;
+}
+
 export function splitTableRows(tableLines: string[]): string[][] {
   return tableLines.map(line => {
     if (isSeparatorLine(line)) {
@@ -64,17 +71,9 @@ export function splitTableRows(tableLines: string[]): string[][] {
   });
 }
 
-// Helper: Split a table line into cells, excluding leading/trailing empty elements
-export function splitTableLineToCells(line: string): string[] {
-  let cells = line.trim().split(/\s*\|\s*/);
-  if (cells.length > 0 && cells[0] === '') cells.shift();
-  if (cells.length > 0 && cells[cells.length - 1] === '') cells.pop();
-  return cells;
-}
-
-// Display width calculation function (full-width: 2, half-width: 1)
 export function getDisplayWidth(str: string): number {
   let width = 0;
+
   for (const ch of str) {
     width +=
       /[\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF01-\uFF60\uFFE0-\uFFE6\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/.test(
@@ -86,7 +85,6 @@ export function getDisplayWidth(str: string): number {
   return width;
 }
 
-// Format separator line (with indentation support)
 export function formatSeparatorLine(
   colWidths: number[],
   indent: string = ''
@@ -94,7 +92,6 @@ export function formatSeparatorLine(
   return indent + '|' + colWidths.map(w => '-'.repeat(w + 2)).join('+') + '|';
 }
 
-// Format empty row
 export function formatEmptyRow(
   colWidths: number[],
   indent: string = ''
@@ -102,7 +99,6 @@ export function formatEmptyRow(
   return indent + '| ' + colWidths.map(w => ' '.repeat(w)).join(' | ') + ' |';
 }
 
-// Format table row
 export function formatTableRow(row: string[], colWidths: number[]): string {
   return (
     '| ' +
@@ -117,16 +113,19 @@ export function formatTableRow(row: string[], colWidths: number[]): string {
   );
 }
 
-// New utility function: getCellOffsetInRow
 export function getCellOffsetInRow(rowText: string, cellIdx: number): number {
   const cellMatches = [...rowText.matchAll(/\|/g)];
+
   if (cellIdx < cellMatches.length - 1) {
     let offset = (cellMatches[cellIdx].index ?? 0) + 1;
+
     if (rowText[offset] === ' ') offset++;
+
     return offset;
   } else {
     // fallback: first cell or after last bar
     const idx = rowText.indexOf('| ');
+
     return idx !== -1
       ? idx + 2
       : (cellMatches[cellMatches.length - 1]?.index ?? 0) + 1;
@@ -143,46 +142,54 @@ export function addColumnToTableRows(rows: string[][]): string[][] {
   });
 }
 
-// Remove a column (cellIdx) from all data rows (pure function)
 export function removeColumnFromRows(
   rows: string[][],
   cellIdx: number
 ): string[][] {
   return rows.map(row => {
     if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) return [...row];
+
     const newRow = [...row];
+
     if (cellIdx >= 0 && cellIdx < newRow.length) {
       newRow.splice(cellIdx, 1);
     }
+
     return newRow;
   });
 }
 
-// Pad all data rows to the maximum number of columns (pure function)
 export function padRowsToMaxCols(rows: string[][]): string[][] {
   const dataRows = rows.filter(
     r => !(r.length === 1 && r[0] === ORG_TABLE_SEPARATOR)
   );
+
   const maxCols =
     dataRows.length === 0 ? 0 : Math.max(...dataRows.map(r => r.length));
+
   return rows.map(row => {
     if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) return [...row];
+
     const newRow = [...row];
+
     while (newRow.length < maxCols) newRow.push('');
+
     return newRow;
   });
 }
 
-// Swap two columns (fromIdx, toIdx) across all data rows (pure function)
 export function swapColumns(
   rows: string[][],
   fromIdx: number,
   toIdx: number
 ): string[][] {
   if (fromIdx === toIdx) return rows.map(r => [...r]);
+
   return rows.map(row => {
     if (row.length === 1 && row[0] === ORG_TABLE_SEPARATOR) return [...row];
+
     const newRow = [...row];
+
     if (
       fromIdx >= 0 &&
       toIdx >= 0 &&
@@ -193,6 +200,7 @@ export function swapColumns(
       newRow[fromIdx] = newRow[toIdx];
       newRow[toIdx] = tmp;
     }
+
     return newRow;
   });
 }
