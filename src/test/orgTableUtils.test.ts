@@ -273,3 +273,14 @@ suite('swapColumns', () => {
     assert.deepStrictEqual(orgTableUtils.swapColumns(input, 0, 1), expected);
   });
 });
+
+suite('getPrevCellPositionInfo', () => {
+  test('gets previous cell position info correctly', () => {
+    const input = ['| a | b | c |', '| d | e | f |'];
+    const expected = { line: 1, offset: 2 };
+    assert.deepStrictEqual(
+      orgTableUtils.getPrevCellPositionInfo(input, 1, 5, 0),
+      expected
+    );
+  });
+});
