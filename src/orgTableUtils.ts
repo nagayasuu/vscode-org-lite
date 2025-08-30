@@ -92,7 +92,6 @@ export function formatSeparatorLine(
   return indent + '|' + colWidths.map(w => '-'.repeat(w + 2)).join('+') + '|';
 }
 
-// Format empty row
 export function formatEmptyRow(
   colWidths: number[],
   indent: string = ''

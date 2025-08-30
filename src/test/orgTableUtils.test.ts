@@ -134,3 +134,12 @@ suite('formatSeparatorLine', () => {
     );
   });
 });
+
+suite('formatEmptyRow', () => {
+  test('formats empty row correctly', () => {
+    assert.strictEqual(
+      orgTableUtils.formatEmptyRow([1, 2, 3], '  '),
+      '  |   |    |     |'
+    );
+  });
+});
