@@ -508,3 +508,96 @@ suite('formatTableRowsWithIndents', () => {
     );
   });
 });
+
+suite('detectTableRangeFromLines', () => {
+  test('detects table range for a single table line', () => {
+    const lines = ['not a table', '| a | b | c |', 'not a table'];
+    const expected = { startLine: 1, endLine: 1 };
+    assert.deepStrictEqual(
+      orgTableUtils.detectTableRangeFromLines(lines, 1),
+      expected
+    );
+  });
+
+  test('detects table range for multiple consecutive table lines', () => {
+    const lines = [
+      'not a table',
+      '| a | b | c |',
+      '| d | e | f |',
+      '| g | h | i |',
+      'not a table',
+    ];
+    const expected = { startLine: 1, endLine: 3 };
+    assert.deepStrictEqual(
+      orgTableUtils.detectTableRangeFromLines(lines, 2),
+      expected
+    );
+  });
+
+  test('detects table range when cursor is at the first line of the table', () => {
+    const lines = [
+      'not a table',
+      '| a | b | c |',
+      '| d | e | f |',
+      'not a table',
+    ];
+    const expected = { startLine: 1, endLine: 2 };
+    assert.deepStrictEqual(
+      orgTableUtils.detectTableRangeFromLines(lines, 1),
+      expected
+    );
+  });
+
+  test('detects table range when cursor is at the last line of the table', () => {
+    const lines = [
+      'not a table',
+      '| a | b | c |',
+      '| d | e | f |',
+      'not a table',
+    ];
+    const expected = { startLine: 1, endLine: 2 };
+    assert.deepStrictEqual(
+      orgTableUtils.detectTableRangeFromLines(lines, 2),
+      expected
+    );
+  });
+
+  test('handles table at the start of the document', () => {
+    const lines = ['| a | b | c |', '| d | e | f |', 'not a table'];
+    const expected = { startLine: 0, endLine: 1 };
+    assert.deepStrictEqual(
+      orgTableUtils.detectTableRangeFromLines(lines, 0),
+      expected
+    );
+  });
+
+  test('handles table at the end of the document', () => {
+    const lines = ['not a table', '| a | b | c |', '| d | e | f |'];
+    const expected = { startLine: 1, endLine: 2 };
+    assert.deepStrictEqual(
+      orgTableUtils.detectTableRangeFromLines(lines, 2),
+      expected
+    );
+  });
+
+  test('handles table with indented lines', () => {
+    const lines = ['  | a | b | c |', '  | d | e | f |', 'not a table'];
+    const expected = { startLine: 0, endLine: 1 };
+    assert.deepStrictEqual(
+      orgTableUtils.detectTableRangeFromLines(lines, 0),
+      expected
+    );
+  });
+
+  test('handles empty lines between tables', () => {
+    const lines = ['| a | b |', '', '| c | d |'];
+    assert.deepStrictEqual(orgTableUtils.detectTableRangeFromLines(lines, 0), {
+      startLine: 0,
+      endLine: 0,
+    });
+    assert.deepStrictEqual(orgTableUtils.detectTableRangeFromLines(lines, 2), {
+      startLine: 2,
+      endLine: 2,
+    });
+  });
+});
