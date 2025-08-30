@@ -116,13 +116,17 @@ export function formatTableRow(row: string[], colWidths: number[]): string {
 // New utility function: getCellOffsetInRow
 export function getCellOffsetInRow(rowText: string, cellIdx: number): number {
   const cellMatches = [...rowText.matchAll(/\|/g)];
+
   if (cellIdx < cellMatches.length - 1) {
     let offset = (cellMatches[cellIdx].index ?? 0) + 1;
+
     if (rowText[offset] === ' ') offset++;
+
     return offset;
   } else {
     // fallback: first cell or after last bar
     const idx = rowText.indexOf('| ');
+
     return idx !== -1
       ? idx + 2
       : (cellMatches[cellMatches.length - 1]?.index ?? 0) + 1;

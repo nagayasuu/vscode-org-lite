@@ -152,3 +152,11 @@ suite('formatTableRow', () => {
     );
   });
 });
+
+suite('getCellOffsetInRow', () => {
+  test('gets cell offset in row correctly', () => {
+    assert.strictEqual(orgTableUtils.getCellOffsetInRow('| a | b |', 0), 2);
+    assert.strictEqual(orgTableUtils.getCellOffsetInRow('| a | b |', 1), 6);
+    assert.strictEqual(orgTableUtils.getCellOffsetInRow('| a | b |', 13), 2);
+  });
+});
