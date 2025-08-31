@@ -4,6 +4,7 @@
   "scopeName": "source.org",
   "patterns": [
     { "include": "#heading" },
+    { "include": "#list" },
     { "include": "#bold" },
     { "include": "#code" },
     { "include": "#link" }
@@ -63,6 +64,24 @@
             "3": {
               "name": "keyword.control.todo.org"
             }
+          }
+        }
+      ]
+    },
+    "list": {
+      "patterns": [
+        {
+          "name": "markup.list.unordered.org",
+          "match": "^(\\s*)([-+*])\\s+(.*)$",
+          "captures": {
+            "2": { "name": "punctuation.definition.list.begin.markdown" }
+          }
+        },
+        {
+          "name": "markup.list.ordered.org",
+          "match": "^(\\s*)(\\d+\\.)(\\s+)(.*)$",
+          "captures": {
+            "2": { "name": "punctuation.definition.list.begin.markdown" }
           }
         }
       ]
