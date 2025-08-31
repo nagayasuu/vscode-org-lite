@@ -24,10 +24,6 @@
     {
       "beforeText": "^\\s*\\*\\s",
       "action": { "indent": "indent" }
-    },
-    {
-      "beforeText": "^\\s*- .+",
-      "action": { "indent": "none", "appendText": "- " }
     }
   ]
 }

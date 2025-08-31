@@ -115,6 +115,11 @@
         "command": "org-lite.tableDeleteColumn",
         "key": "ctrl+alt+k",
         "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
+      },
+      {
+        "command": "org-lite.smartEnter",
+        "key": "enter",
+        "when": "editorTextFocus && editorLangId == org"
       }
     ]
   },

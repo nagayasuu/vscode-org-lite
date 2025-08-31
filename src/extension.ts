@@ -5,6 +5,7 @@ import { ORG_LANGUAGE } from './constants';
 import { OrgDocumentLinkProvider } from './orgDocumentLinkProvider';
 import { OrgDocumentSymbolProvider } from './orgDocumentSymbolProvider';
 import { OrgPathCompletionProvider } from './orgPathCompletionProvider';
+import { smartEnter } from './orgSmartEnterCommands';
 import { OrgTableCommandManager } from './orgTableCommandManager';
 import { OrgTaskCommandManager } from './orgTaskCommandManager';
 
@@ -15,6 +16,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   const providers = registerProviders();
   context.subscriptions.push(...providers);
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('org-lite.smartEnter', smartEnter)
+  );
 }
 
 function registerCommands(context: vscode.ExtensionContext) {
