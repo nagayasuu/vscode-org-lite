@@ -68,3 +68,25 @@ export async function smartEnter(): Promise<void> {
   // If not a list line, insert a normal newline
   await vscode.commands.executeCommand('default:type', { text: '\n' });
 }
+
+// orgListLineFocus context key management function
+export function updateOrgListLineFocus() {
+  const editor = vscode.window.activeTextEditor;
+
+  if (!editor || editor.document.languageId !== 'org') {
+    vscode.commands.executeCommand('setContext', 'orgListLineFocus', false);
+    return;
+  }
+
+  const pos = editor.selection.active;
+  const lineText = editor.document.lineAt(pos.line).text;
+  const isListLine =
+    /^\s*[-*+]\s/.test(lineText) || /^\s*\d+\.\s/.test(lineText);
+
+  // Only set true when the line itself is a list line (not surrounding lines)
+  vscode.commands.executeCommand(
+    'setContext',
+    'orgListLineFocus',
+    !!isListLine
+  );
+}

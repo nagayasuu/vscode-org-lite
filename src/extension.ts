@@ -5,7 +5,7 @@ import { ORG_LANGUAGE } from './constants';
 import { OrgDocumentLinkProvider } from './orgDocumentLinkProvider';
 import { OrgDocumentSymbolProvider } from './orgDocumentSymbolProvider';
 import { OrgPathCompletionProvider } from './orgPathCompletionProvider';
-import { smartEnter } from './orgSmartEnterCommands';
+import { smartEnter, updateOrgListLineFocus } from './orgSmartEnterCommands';
 import { OrgTableCommandManager } from './orgTableCommandManager';
 import { OrgTaskCommandManager } from './orgTaskCommandManager';
 
@@ -19,6 +19,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand('org-lite.smartEnter', smartEnter)
+  );
+
+  // Update list line focus context on selection/active editor changes
+  context.subscriptions.push(
+    vscode.window.onDidChangeTextEditorSelection(updateOrgListLineFocus),
+    vscode.window.onDidChangeActiveTextEditor(updateOrgListLineFocus)
   );
 }
 
