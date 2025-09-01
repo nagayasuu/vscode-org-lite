@@ -84,12 +84,12 @@
       {
         "command": "org-lite.formatOrgTable",
         "key": "tab",
-        "when": "editorTextFocus && editorLangId == org && orgTableLineFocus"
+        "when": "editorTextFocus && editorLangId == org && orgTableLineFocus && !inlineEditIsVisible && !cursorAtInlineEdit && !tabShouldAcceptInlineEdit"
       },
       {
         "command": "org-lite.moveToNextTableCell",
         "key": "tab",
-        "when": "editorTextFocus && editorLangId == org && orgTableCellFocus"
+        "when": "editorTextFocus && editorLangId == org && orgTableCellFocus && !inlineEditIsVisible && !cursorAtInlineEdit && !tabShouldAcceptInlineEdit"
       },
       {
         "command": "org-lite.moveToPrevTableCell",
