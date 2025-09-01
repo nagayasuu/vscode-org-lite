@@ -119,7 +119,7 @@
       {
         "command": "org-lite.smartEnter",
         "key": "enter",
-        "when": "editorTextFocus && editorLangId == org"
+        "when": "editorTextFocus && editorLangId == org && orgListLineFocus"
       }
     ]
   },
